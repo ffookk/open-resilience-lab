@@ -5,3 +5,4 @@
 - 可选文本 `notes` 和 `household[].needs` 不填写时应省略字段；写成空字符串或 `null` 会校验失败。
 - 可选列表 `household` 和 `sources` 可以省略或写成 `[]`；不能写成 `null`。
 - 家庭成员已填写 `name` 但省略 `needs` 时，HTML 会显示“未填写 / Not provided”。
+- 文本首尾空白不会自动删除；仅由空白组成的文本会被拒绝。
