@@ -40,6 +40,8 @@ python3 resilience_plan.py private-input/household.json --output private-output/
 其他占位文本不会被工具自动识别或核实，必须由填写者逐项替换和核对；通过格式校验不代表内容已经审核。
 
 `template` 是 `init` 的别名；`python3 resilience_plan.py init --help` 显示模板命令帮助。
+若当前目录的已有 JSON 输入文件恰好名为 `init` 或 `template`，请使用
+`python3 resilience_plan.py ./init` 或 `python3 resilience_plan.py ./template`，以按输入文件读取。
 可用 `--output private-input/another-plan.json` 创建另一个模板，目标必须位于当前目录的
 `private-input/` 下且使用 `.json` 扩展名；模板目标和其中的目录不能是符号链接。
 已有文件默认拒绝覆盖，`init --force` **仅允许重建完全未编辑的本工具模板**；已填写预案、
