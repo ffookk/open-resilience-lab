@@ -16,6 +16,7 @@
 ## 本地运行
 
 需要 Python 3.10 或更新版本；无需 `pip install`，下载仓库后生成过程不需要联网。
+生成命令的参数说明可用 `python3 resilience_plan.py --help` 查看。
 先使用全虚构示例：
 
 ```sh
