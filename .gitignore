@@ -1,0 +1,16 @@
+# Real household plans, exports, local review artifacts and secrets must stay local.
+private-input/
+private-output/
+local-data/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+__pycache__/
+*.py[cod]
+.DS_Store
+
+.venv/
+*.log
+!.env.sample
