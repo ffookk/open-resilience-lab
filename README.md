@@ -139,6 +139,6 @@ python3 -m unittest discover -s tests -v
 
 ## 参与方式
 
-阅读 `ROADMAP.md` 和 `CONTRIBUTING.md`，选择范围明确的工作并通过 issue 与 PR 协作。
+阅读 [路线图](ROADMAP.md) 和 [贡献指南](CONTRIBUTING.md)，选择范围明确的工作并通过 issue 与 PR 协作。
 代码、资料纠错、翻译、演练设计和使用反馈都可以贡献。
 每条 PR 应说明关联问题、实际改动、验证证据和仍未完成的事项。
