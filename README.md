@@ -26,6 +26,7 @@ python3 resilience_plan.py examples/fictional-household.json
 用本机浏览器打开 `private-output/emergency-plan.html`，通过浏览器“打印”菜单打印或另存为 PDF。
 输出含内嵌打印样式，但不同浏览器和长内容的分页仍需自行预览。
 程序不主动打开浏览器，不会在终端回显家庭资料或输入路径。
+命令成功返回退出码 `0`；输入、参数或保存失败时返回 `2`，脚本应先检查退出码再处理输出。
 
 准备自己的预案时，在仓库根目录执行 `init`，直接在忽略的 `private-input/` 目录生成新模板：
 
