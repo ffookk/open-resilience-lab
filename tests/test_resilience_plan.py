@@ -17,9 +17,10 @@ class PlanTests(unittest.TestCase):
     def setUp(self):
         self.plan = json.loads(EXAMPLE.read_text(encoding="utf-8"))
 
-    def test_example_validates_and_generates_bilingual_content(self):
+    def test_example_validates_and_generates_english_content(self):
         document = app.render_plan(app.load_plan(EXAMPLE))
-        self.assertIn("紧急联系人 / Contacts", document)
+        self.assertIn("<html lang=\"en\">", document)
+        self.assertIn("<h2>Contacts</h2>", document)
         self.assertIn(self.plan["contacts"][0]["name"], document)
         self.assertIn("@media print", document)
 

@@ -1,28 +1,28 @@
-# 隐私与贡献检查
+# Privacy and contribution checks
 
-## 已采用的措施
+## Measures in place
 
-- 演示和测试只使用虚构内容；个人输入与输出放在忽略的本地目录。
-- 提交使用 GitHub noreply 邮箱；提交前检查作者和提交者信息。
-- 新建提交后、推送前再次运行 `python3 scripts/privacy_check.py --history`，让检查覆盖刚生成的提交元数据。
-- CI 使用只读仓库权限，不传入项目密钥，不上传输入、输出或测试文件作为 artifact。
-- GitHub Actions 固定到具体提交；依赖更新时需要重新检查。
-- 隐私检查发现问题时仅显示规则名和文件序号，不回显匹配值。
+- Demonstrations and tests use fictional content; personal inputs and outputs belong in ignored local directories.
+- Commits use a GitHub noreply email address; inspect author and committer details before committing.
+- After creating a commit and before pushing, rerun `python3 scripts/privacy_check.py --history` so that checks include the new commit metadata.
+- CI uses read-only repository permissions, receives no project secrets, and does not upload input, output, or test files as artifacts.
+- GitHub Actions are pinned to specific commits; review dependency updates again before adopting them.
+- Privacy findings display only rule names and file numbers, never matched values.
 
-## 提交前运行
+## Run before committing
 
 ```sh
-git add <准备提交的文件>
+git add <files-to-commit>
 python3 scripts/privacy_check.py --history
-python3 -m unittest discover -s tests -v
+git diff --cached --check
 ```
 
-检查覆盖已跟踪工作树文本、暂存区内容、可达提交中的文本及文件名和提交元数据，并检测常见密钥格式、私人对话链接、本机用户路径、非示例邮箱和敏感目录。二进制及符号链接需要人工处理。
-复现错误时先用虚构数据重建最小输入；只替换姓名仍可能留下联系方式、位置或备注中的私人信息。
+The checker covers tracked working-tree text, staged content, reachable historical text and filenames, and commit metadata. It detects common secret formats, private conversation links, local user paths, non-example email addresses, and sensitive directories. Binary files and symbolic links require manual handling.
+Reproduce errors with a minimal fictional input first. Replacing names alone can leave private information in contact details, locations, or notes.
 
-这是启发式检查，不能识别所有个人信息、自定义凭据或图片内容。它也不会检查未跟踪文件、GitHub issue/PR 正文、云端不可达历史、平台内部保留记录或已存在的外部副本。发布前仍需人工审阅差异及协作内容。
-可在受信任的本地终端用 `git diff --cached` 审阅实际待提交内容；不要把含私人值的差异粘贴到公开反馈中。
+This heuristic check cannot identify every kind of personal information, custom credential, or image content. It does not inspect untracked files, GitHub issue/PR bodies, unreachable cloud history, platform retention records, or existing external copies. Manually review diffs and collaboration content before publishing.
+Use `git diff --cached` in a trusted local terminal to inspect the actual staged changes. Do not paste diffs containing private values into public feedback.
 
-## 发现问题时
+## If a problem is found
 
-停止继续提交，先在本机定位和移除相关内容。不要在 issue、PR、讨论、截图或日志中粘贴原值；如凭据确已暴露，先撤销或轮换，再处理仓库历史。普通 issue 仅记录不含敏感值的处理状态。
+Stop publishing changes and locate and remove the content locally first. Never paste original values into issues, PRs, discussions, screenshots, or logs. If a credential was exposed, revoke or rotate it before addressing repository history. Ordinary issues should record only a status update without sensitive values.

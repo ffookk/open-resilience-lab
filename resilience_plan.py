@@ -30,20 +30,20 @@ def template_document():
     """An editable draft; never invent a household review or a verified source."""
     plan = {
         "schema_version": 1,
-        "title": "[填写预案名称 / Enter a plan title]",
-        "region": "[填写适用地区 / Enter the applicable region]",
+        "title": "[Enter a plan title]",
+        "region": "[Enter the applicable region]",
         "reviewed_on": "YYYY-MM-DD",
         "contacts": [{
-            "name": "[填写联系人 / Enter a contact name]",
-            "role": "[填写约定角色 / Enter the agreed role]",
-            "contact": "[在本地填写联系方式 / Enter contact details locally]",
+            "name": "[Enter a contact name]",
+            "role": "[Enter the agreed role]",
+            "contact": "[Enter contact details locally]",
         }],
         "meeting_points": [{
-            "label": "[填写集合安排名称 / Enter a meeting arrangement label]",
-            "instructions": "[与家庭成员约定后填写 / Enter instructions agreed with your household]",
+            "label": "[Enter a meeting arrangement label]",
+            "instructions": "[Enter instructions agreed with your household]",
         }],
         "household": [],
-        "notes": "待填写和家庭核对的模板，不能直接作为应急预案。替换所有占位内容；完成家庭核对后，将 reviewed_on 填为实际核对日期。 / Draft only: replace all placeholders and enter the actual household review date after reviewing the plan together.",
+        "notes": "Draft only, not a ready-to-use emergency plan: replace all placeholders and enter the actual household review date after reviewing the plan together.",
         "sources": [],
     }
     return json.dumps(plan, ensure_ascii=False, indent=2) + "\n"
@@ -156,11 +156,11 @@ def render_plan(plan):
     )
     contacts = cards((item["name"] + " · " + item["role"], item["contact"]) for item in plan["contacts"])
     meetings = cards((item["label"], item["instructions"]) for item in plan["meeting_points"])
-    household = cards((item["name"], item.get("needs", "未填写 / Not provided")) for item in plan.get("household", []))
-    sources = cards((item["title"], item["url"] + "\n填写的核对日期 / Entered review date: " + item["verified_on"])
+    household = cards((item["name"], item.get("needs", "Not provided")) for item in plan.get("household", []))
+    sources = cards((item["title"], item["url"] + "\nEntered review date: " + item["verified_on"])
                     for item in plan.get("sources", []))
     return '''<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
@@ -171,20 +171,17 @@ h1{line-height:1.25}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-b
 p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left:4px solid #59747a;padding:12px;background:#e7eff1}footer{font-size:.9rem;margin-top:32px}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid}footer{border-top:1px solid #888}}
-</style></head><body><header><p>家庭离线应急预案 / Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>适用地区 / Region: ''' + escape(plan["region"]) + '''
-家庭核对日期 / Household review date: ''' + escape(plan["reviewed_on"]) + '''</p></header>
-<p class="notice">本文件可能包含私人资料。仅在受信任的本地设备查看；打印件也须妥善保管。
-This file may contain private information. Keep local copies and printouts secure.
-通过浏览器“打印”菜单打印；所有内容均已包含在本文件中。</p>
-<main><section><h2>紧急联系人 / Contacts</h2>''' + contacts + '''</section>
-<section><h2>约定集合安排 / Agreed meeting points</h2>''' + meetings + '''</section>
-<section><h2>家庭成员与支持需求 / Household and support needs</h2>''' + (household or '<p>未填写 / Not provided</p>') + '''</section>
-<section><h2>家庭备注 / Household notes</h2><p>''' + escape(plan.get("notes", "未填写 / Not provided")) + '''</p></section>
-<section><h2>填写者提供的资料来源 / Sources entered by the author</h2><p>工具没有访问或核实这些资料；日期由填写者提供。链接仅按文本展示。
-The tool does not fetch or verify sources; dates are supplied by the author. URLs are plain text.</p>''' + (sources or '<p>未填写；地区要求尚未由本工具核验。 / None supplied; regional requirements are unverified.</p>') + '''</section></main>
-<footer><p>本工具只整理家庭自行约定的内容，不提供医疗建议，也不验证预案在具体灾害中的安全性。应急情况请依照当地官方指引。
-This tool organizes household decisions; it provides no medical advice and does not certify disaster safety. Follow local official instructions.</p>
-<p>Open Resilience Lab · 格式版本 / Schema version 1 · 无脚本、无遥测、无外部资源 / No scripts, telemetry, or external resources</p></footer>
+</style></head><body><header><p>Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>Region: ''' + escape(plan["region"]) + '''
+Household review date: ''' + escape(plan["reviewed_on"]) + '''</p></header>
+<p class="notice">This file may contain private information. View it only on a trusted local device and keep local copies and printouts secure.
+Use the browser Print menu; all content is included in this file.</p>
+<main><section><h2>Contacts</h2>''' + contacts + '''</section>
+<section><h2>Agreed meeting points</h2>''' + meetings + '''</section>
+<section><h2>Household and support needs</h2>''' + (household or '<p>Not provided</p>') + '''</section>
+<section><h2>Household notes</h2><p>''' + escape(plan.get("notes", "Not provided")) + '''</p></section>
+<section><h2>Sources entered by the author</h2><p>The tool does not fetch or verify sources; dates are supplied by the author. URLs are plain text.</p>''' + (sources or '<p>None supplied; regional requirements are unverified.</p>') + '''</section></main>
+<footer><p>This tool organizes household decisions; it provides no medical advice and does not certify disaster safety. Follow local official instructions.</p>
+<p>Open Resilience Lab · Schema version 1 · No scripts, telemetry, or external resources</p></footer>
 </body></html>
 '''
 

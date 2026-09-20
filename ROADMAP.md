@@ -1,35 +1,37 @@
-# 路线图
+# Roadmap
 
-勾选项已有代码或文档交付；未勾选项仍是计划。自动化测试不代表真实家庭、灾害或全部设备的验证。
+Checked items have code or documentation deliverables. Unchecked items remain planned. Automated tests do not establish validation by real households, in disasters, or on all devices.
 
-## PR 1：问题与证据结构
+## PR 1: problem and evidence structure
 
-- [ ] 从可取得的官方安全与民防资料提取适合开源协作的问题。
-- [ ] 为问题记录适用地区、原始来源、发布日期、核验日期和待确认事项。
-- [x] 选择一个明确的个人或家庭应急准备使用场景：离线查找家庭自行约定的联系人与集合安排。
+- [ ] Extract problems suitable for open-source collaboration from available official security and civil-protection sources.
+- [ ] Record the applicable region, original source, publication date, review date, and open questions for each problem.
+- [x] Select a specific personal or household preparedness scenario: finding household-agreed contacts and meeting arrangements offline.
 
-验收：每个具体政策或准备要求均能回溯到相应地区的来源；推测与文件事实分开记录。
+Acceptance: every specific policy or preparedness requirement can be traced to its regional source, with inferences recorded separately from document facts.
 
-## PR 2：离线应急预案生成器原型
+## PR 2: offline household plan generator prototype
 
-- [x] 定义最少必要的输入及预案输出结构（JSON schema version 1，见 README）。
-- [x] 建立本地 JSON 编辑 → HTML 生成原型，并提供打印样式；浏览器分页另行验证。
-- [x] 实现无需联网的生成路径；首次取得仓库和 Python 后无需下载依赖，禁用 socket 的生成测试通过。
-- [x] 使用虚构资料提供演示样例。
-- [x] 新增 `init` / `template` 本地模板命令：待核对日期占位、私有文件权限、默认拒绝覆盖、仅允许重建未编辑模板；保留原有生成命令。
-- [x] 完成单 Chrome 引擎、全虚构示例的离线桌面/窄屏与 A4 PDF 检查，见 [检查记录](docs/browser-check.md)。
-- [ ] 通过真实断网的浏览器查看、长预案分页和纸质打印检查。
-- [ ] 增加图形编辑界面与 HTML 反向导入。
+- [x] Define the minimum necessary input and output structure (JSON schema version 1; see README).
+- [x] Build a local JSON-editing-to-HTML prototype with print styles; validate browser pagination separately.
+- [x] Implement offline generation: after obtaining the repository and Python, no dependency downloads are needed, and generation tests with sockets disabled pass.
+- [x] Provide a fictional demonstration example.
+- [x] Add local `init` / `template` commands with an unreviewed date placeholder, private file permissions, default overwrite refusal, replacement only of an unchanged draft, and preservation of the original generation command.
+- [x] Check the earlier bilingual fictional example offline in one Chrome engine at desktop/narrow viewports and as A4 PDF; see the [check record](docs/browser-check.md).
+- [x] Recheck the English fictional presentation at desktop and narrow viewports in one offline Chrome context.
+- [ ] Recheck PDF pagination for the English presentation.
+- [ ] Complete browser viewing with a real network disconnection, long-plan pagination, and physical printing checks.
+- [ ] Add a graphical editor and HTML import.
 
-当前证据：CLI 自动化测试、严格校验、HTML 转义、受限文件权限、覆盖保护、无外部资源结构检查，
-以及单一 Chrome 离线上下文中的桌面/窄屏和两页 A4 PDF 记录。
-输出列出填写者输入的地区、核对日期和来源；尚未验证地区规则或真实家庭使用效果。
-完整验收仍需：在真实断网环境中完成查看与打印流程，记录分页、可访问性和使用反馈。
+Current evidence: automated CLI tests, strict validation, HTML escaping, restricted file permissions, overwrite protection, absence-of-external-resources checks,
+and a historical desktop/narrow-viewport and two-page A4 PDF record in one offline Chrome context.
+Output shows the region, review date, and sources supplied by the person completing the plan. Regional rules and real household outcomes remain unverified.
+Full acceptance still requires viewing and printing in a genuinely disconnected environment, with pagination, accessibility, and usage feedback recorded.
 
-## PR 3：验证工具是否有帮助
+## PR 3: verify usefulness
 
-- [ ] 记录目标用户完成一次准备任务所需时间、遗漏项和理解困难。
-- [ ] 检查键盘操作、打印版和基本可访问性。
-- [ ] 根据观察结果修正原型，并记录局限。
+- [ ] Record target users' task completion time, omissions, and comprehension difficulties.
+- [ ] Check keyboard operation, print output, and basic accessibility.
+- [ ] Revise the prototype based on observations and document limitations.
 
-验收：至少提供可复现的使用场景与改进前后结果；演示完成不等于通过真实灾害或专业应急认证。
+Acceptance: provide at least a reproducible usage scenario and before/after results. Completing a demonstration does not establish real disaster readiness or professional emergency certification.

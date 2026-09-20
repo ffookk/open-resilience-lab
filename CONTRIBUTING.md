@@ -1,31 +1,34 @@
-# 贡献指南
+# Contributing
 
-## 提交一个清楚的小改动
+## Submit one clear, small change
 
-1. 从 ROADMAP.md 选择一个独立问题，说明预期结果。
-2. 在新分支中完成改动，提交时使用清晰的 commit message。
-3. 提交 Pull Request，写明改动目的、来源、验证方式及局限。
+1. Choose an independent problem from [ROADMAP.md](ROADMAP.md) and state the expected result.
+2. Make the change on a new branch and use a clear commit message.
+3. Open a pull request describing the purpose, sources, validation, and limitations.
 
-涉及 CLI 参数时，同时核对 `--help`、README 示例和默认路径，避免同一命令出现相互矛盾的说明。
+Write repository documentation, examples, generated interface text, issues, PRs, discussions, release notes, and commit messages in English.
+When changing CLI options, check `--help`, README examples, and default paths together so that instructions remain consistent.
 
-## 证据与数据
+## Evidence and data
 
-- 事实记录尽量引用官方文件、原始数据或原始研究，保留准确位置和核验日期。
-- 明确区分来源陈述、作者推断、待核实信息和实验结果。
-- 涉及时效性内容时注明适用时间，更新时保留必要的更正说明。
-- 不把聊天记录或 AI 回答本身当作事实已获验证的依据。
-- 导入外部内容前检查许可及再分发条件，优先保留链接和必要的最少摘录。
+- Prefer official documents, original data, or original research for factual records; retain precise source locations and review dates.
+- Distinguish source statements, author inferences, unverified information, and experimental results.
+- State the applicable date for time-sensitive content and retain necessary correction notes when updating it.
+- Do not treat a conversation or an AI answer itself as evidence that a fact has been verified.
+- Check licensing and redistribution terms before importing external material; prefer links and the minimum necessary excerpts.
 
-## 隐私与验证
+## Privacy and validation
 
-- 使用虚构或可合法公开的样例，不提交 API 密钥、凭据、真实家庭联系方式或私密对话。
-- 数据改动应能追溯并复核；代码改动应附适合该功能的运行说明和验证结果。
-- 输入字段变动需同时检查字段省略、空值、类型和长度，以及对应 HTML 中的展示方式。
-- 尚未实现或验证的内容明确标记，不把计划写成已完成成果。
-- 浏览器问题记录具体版本、视口尺寸和使用的虚构样例；窄屏截图不等同于实体移动设备验证。
+- Use fictional or lawfully public examples. Do not commit API keys, credentials, real household contact details, or private conversations.
+- Data changes should be traceable and reviewable; code changes should include appropriate execution instructions and validation results.
+- When changing input fields, check omission, empty values, types, lengths, and the corresponding HTML display.
+- Clearly label work that has not been implemented or verified; do not describe plans as completed results.
+- For browser problems, record the exact version, viewport size, and fictional sample. Narrow-screen screenshots do not establish physical mobile-device validation.
 
-## 自动检查
+## Automated checks
 
-提交前阅读 [隐私检查说明](docs/privacy.md)，运行项目 README 中的验证命令及 `python3 scripts/privacy_check.py --history`。PR 的 Checks 工作流会执行隐私检查、单元测试和文档中的虚构示例。
+Before committing, read the [privacy guide](docs/privacy.md), run the validation commands in the README, and run `python3 scripts/privacy_check.py --history`. The PR Checks workflow runs privacy checks, unit tests, and documented fictional examples.
 
-`main` 当前要求通过 PR 合并，并通过 `validate` 检查；管理员也适用。请在工作分支提交，禁止强制推送或删除主分支。自动检查不替代事实、隐私和使用效果审阅。
+`main` currently requires a PR and a passing `validate` check, including for administrators. Commit on a working branch; force pushes and deletion of the main branch are prohibited. Automated checks do not replace reviews of facts, privacy, or usefulness.
+
+Run `python3 scripts/check_english.py` after staging changes. CI checks current tracked text, including decoded JSON values, for CJK scripts. This guard is not a general language classifier; manually review all public wording and GitHub collaboration text for English. Historical revisions are outside this check.

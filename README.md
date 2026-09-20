@@ -1,147 +1,147 @@
-# Open Resilience Lab · 开放韧性实验室
+# Open Resilience Lab
 
-从公共安全战略中提取可验证的问题，协作开发应急准备、信息核查、网络防御和关键服务连续性工具。
+Turn public safety strategies into verifiable questions and collaboratively develop tools for emergency preparedness, information verification, cyber defense, and continuity of essential services.
 
-每项工作都应回答三个问题：谁遇到了什么困难、准备交付什么、怎样证明有用。
-瑞士安全政策战略是本项目的第一组研究线索；项目由独立贡献者维护，不代表政府认可或委托。
+Each task should answer three questions: who faces what difficulty, what will be delivered, and how its usefulness will be demonstrated.
+Swiss security policy strategy provides the first research leads. Independent contributors maintain this project; it is not government endorsed or commissioned.
 
-## 当前状态
+## Current status
 
-已提供一个零第三方依赖的 Python CLI 原型：创建本地可编辑 JSON 模板，再生成自包含 HTML 应急预案。
-工具不请求网络、不运行遥测，生成页没有脚本或外部资源；来源网址仅显示为文字。
-已验证输入校验、HTML 转义、覆盖保护、文件权限和禁用 socket 条件下的生成流程。
-全虚构示例已通过单一 Chrome 引擎的离线桌面/窄屏查看与两页 A4 PDF 检查，见 [浏览器检查记录](docs/browser-check.md)。
-跨浏览器、实体移动设备、屏幕阅读器、实体打印与真实家庭试用仍待验证，也没有地区政策核验结果。
+A Python CLI prototype with no third-party dependencies creates an editable local JSON draft and generates a self-contained HTML household plan.
+The tool makes no network requests and runs no telemetry. Generated pages contain no scripts or external resources; source URLs appear only as text.
+Input validation, HTML escaping, overwrite protection, file permissions, and generation with Python sockets disabled have been checked.
+The earlier bilingual version of the fictional example passed an offline desktop/narrow-viewport check in one Chrome engine and a two-page A4 PDF check; see the [browser check record](docs/browser-check.md). The current English presentation has also passed an offline desktop/narrow-screen layout check in the same Chrome version; its PDF pagination has not been rechecked.
+Cross-browser use, physical mobile devices, screen readers, physical printing, and real household trials remain unverified. Regional policy requirements have not been verified either.
 
-## 本地运行
+## Run locally
 
-需要 Python 3.10 或更新版本；无需 `pip install`，下载仓库后生成过程不需要联网。
-生成命令的参数说明可用 `python3 resilience_plan.py --help` 查看。
-先使用全虚构示例：
+Requires Python 3.10 or later. No `pip install` is needed, and generation works offline once the repository and Python are available.
+Use `python3 resilience_plan.py --help` to inspect generator options.
+Start with the entirely fictional example:
 
 ```sh
 python3 resilience_plan.py examples/fictional-household.json
 ```
 
-用本机浏览器打开 `private-output/emergency-plan.html`，通过浏览器“打印”菜单打印或另存为 PDF。
-输出含内嵌打印样式，但不同浏览器和长内容的分页仍需自行预览。
-程序不主动打开浏览器，不会在终端回显家庭资料或输入路径。
-命令成功返回退出码 `0`；输入、参数或保存失败时返回 `2`，脚本应先检查退出码再处理输出。
+Open `private-output/emergency-plan.html` in a local browser and use its Print menu to print or save a PDF.
+The output includes print styles, but pagination should still be previewed for each browser and for long content.
+The program does not open a browser or echo household details or input paths in the terminal.
+A successful command returns exit code `0`; input, argument, or save failures return `2`. Scripts should check the exit code before using the output.
 
-准备自己的预案时，在仓库根目录执行 `init`，直接在忽略的 `private-input/` 目录生成新模板：
+To prepare a personal plan, run `init` from the repository root to create a draft in the ignored `private-input/` directory:
 
 ```sh
 python3 resilience_plan.py init
-# 在受信任的本地编辑器中打开 private-input/household.json：
-# 替换全部占位内容；家庭核对完成后填写 reviewed_on 的实际日期，再生成：
-python3 resilience_plan.py private-input/household.json --output private-output/my-plan.html
+# Open private-input/household.json in a trusted local editor.
+# Replace every placeholder and enter the actual reviewed_on date after household review.
+python3 resilience_plan.py private-input/household.json
 ```
 
-模板的 `reviewed_on` 初始值为 `YYYY-MM-DD`，**故意不能通过日期校验**，也不会自动填入今天或声称已经家庭审核。
-只在实际核对之后填入核对日期。若只是试用生成和打印，请运行上面的全虚构示例。
-其他占位文本不会被工具自动识别或核实，必须由填写者逐项替换和核对；通过格式校验不代表内容已经审核。
+The initial `reviewed_on` value is `YYYY-MM-DD` and **intentionally fails date validation**. The tool does not insert today's date or claim that household review has taken place.
+Enter the review date only after reviewing the plan. To try generation and printing, use the fictional example above.
+The tool does not detect or verify the other placeholders. The person completing the draft must replace and check each one; passing format validation does not establish that the content has been reviewed.
 
-`template` 是 `init` 的别名；`python3 resilience_plan.py init --help` 显示模板命令帮助。
-若当前目录的已有 JSON 输入文件恰好名为 `init` 或 `template`，请使用
-`python3 resilience_plan.py ./init` 或 `python3 resilience_plan.py ./template`，以按输入文件读取。
-可用 `--output private-input/another-plan.json` 创建另一个模板，目标必须位于当前目录的
-`private-input/` 下且使用 `.json` 扩展名；模板目标和其中的目录不能是符号链接。
-已有文件默认拒绝覆盖，`init --force` **仅允许重建完全未编辑的本工具模板**；已填写预案、
-其他 JSON、硬链接和不相关源文件均不能用它覆盖。需要新的模板时选择新文件名。
-JSON 和新建的每一级模板目录在 POSIX 系统上分别使用 `0600`、`0700` 权限；
-既有目录权限不会被更改，Windows 用户应使用系统的访问权限设置。
+`template` is an alias for `init`; `python3 resilience_plan.py init --help` displays template command help.
+If an existing JSON input file in the current directory is named `init` or `template`, use
+`python3 resilience_plan.py ./init` or `python3 resilience_plan.py ./template` to read it as an input file.
+Use `--output private-input/another-plan.json` to create another draft. The destination must be under
+`private-input/` in the current directory and have a `.json` extension; neither the destination nor its directories may be symbolic links.
+Existing files are protected by default. `init --force` **can only recreate an entirely unchanged draft produced by the current version of this tool**. Filled plans,
+other JSON files, hard links, and unrelated source files cannot be overwritten this way. Choose a new filename when you need a new draft.
+On POSIX systems, the JSON file and each newly created template directory use permissions `0600` and `0700`, respectively.
+Existing directory permissions are unchanged. Windows users should configure access through their operating system.
 
-已有 HTML 输出默认拒绝覆盖；确认需要更新时加 `--force`。即使加上该选项，也拒绝覆盖输入文件、
-输入的硬链接或任何输出符号链接。程序创建的 HTML 在 POSIX 系统上使用 `0600` 权限，
-新建的直接输出目录使用 `0700`；既有目录权限不会被更改。
+Existing HTML output is protected by default; add `--force` when you intend to replace it. Even with this option, the tool refuses to overwrite the input,
+a hard link to the input, or any output symbolic link. Created HTML files use `0600` permissions on POSIX systems,
+and a newly created immediate output directory uses `0700`; existing directory permissions are unchanged.
 
-**真实输入、HTML、PDF 和打印件均可能含私人资料。** `private-input/`、`private-output/`
-已被 Git 忽略，但 `.gitignore` 不是加密或访问控制，也挡不住强制提交、云同步或编辑器扩展。
-请使用受信任的本地设备和存储位置，仅填写必要信息，检查备份与打印位置，并且不要把真实预案贴到 issue 或 PR。
-HTML 是预览与打印文件；更新时编辑原始 JSON 并重新生成，暂不支持从 HTML 反向导入。
+**Real input files, HTML, PDFs, and printouts may contain private information.** Git ignores `private-input/` and `private-output/`,
+but `.gitignore` provides neither encryption nor access control and cannot prevent forced commits, cloud synchronization, or editor extension access.
+Use trusted local devices and storage, enter only necessary information, check backup and printing locations, and never paste a real plan into an issue or PR.
+HTML is for previewing and printing. To update a plan, edit the original JSON and generate it again; importing HTML back into JSON is not supported.
 
-## 输入格式与边界
+## Input format and boundaries
 
-完整示例见 [虚构家庭 JSON](examples/fictional-household.json)。所有对象均拒绝未知字段；文本不可为空。
-文件必须是 UTF-8 JSON，不超过 256 KiB，拒绝重复键、无效日期和控制字符。
-更多填写与命令说明见 [使用细节](docs/usage-notes.md)。
+See the complete [fictional household JSON](examples/fictional-household.json). All objects reject unknown fields, and text must not be empty.
+The file must be UTF-8 JSON no larger than 256 KiB. Duplicate keys, invalid dates, and unsupported control characters are rejected.
+See [usage notes](docs/usage-notes.md) for more input and command details.
 
-| 字段 | 要求 |
+| Field | Requirements |
 |---|---|
-| `schema_version` | 整数 `1` |
-| `title`、`region` | 必填文本，各最多 120 字符 |
-| `reviewed_on` | 家庭自行核对的日期，`YYYY-MM-DD` |
-| `contacts` | 1–20 项；每项必填 `name`、`role`、`contact`，各最多 200 字符 |
-| `meeting_points` | 1–10 项；`label` 最多 120 字符，`instructions` 最多 2000 字符 |
-| `household` | 可选，最多 20 项；必填 `name` 最多 120 字符，可选 `needs` 最多 1000 字符 |
-| `notes` | 可选文本，最多 4000 字符 |
-| `sources` | 可选，最多 20 项；必填 `title` 最多 200 字符、`url` 最多 2000 字符、`verified_on` 日期 |
+| `schema_version` | Integer `1` |
+| `title`, `region` | Required text, at most 120 characters each |
+| `reviewed_on` | Date of the household's own review, in `YYYY-MM-DD` format |
+| `contacts` | 1–20 entries; each requires `name`, `role`, and `contact`, at most 200 characters each |
+| `meeting_points` | 1–10 entries; `label` at most 120 characters and `instructions` at most 2000 characters |
+| `household` | Optional, at most 20 entries; required `name` at most 120 characters and optional `needs` at most 1000 characters |
+| `notes` | Optional text, at most 4000 characters |
+| `sources` | Optional, at most 20 entries; required `title` at most 200 characters, `url` at most 2000 characters, and a `verified_on` date |
 
-来源网址仅接受 HTTPS，拒绝凭据、查询参数、片段和空白。工具不会访问这些地址，也不会验证填写者的核对日期或资料正确性。
-本工具只整理家庭自行约定的安排，不提供具体医疗建议或灾害安全认证；地区相关内容应由填写者按当地官方资料核对。
+Source URLs must use HTTPS and contain no credentials, query parameters, fragments, or whitespace. The tool does not visit these URLs or verify supplied dates or information.
+This tool organizes arrangements agreed by a household. It provides neither specific medical advice nor disaster safety certification. The person completing the plan should check regional information against local official sources.
 
-## 开发验证
+## Development checks
 
 ```sh
 python3 -m unittest discover -s tests -v
 ```
 
-功能测试覆盖恶意 HTML 转义、必填与类型/长度限制、无效/重复/过大 JSON、错误不回显输入、
-覆盖与链接保护、POSIX 权限、外部资源标记缺失，以及禁用 Python socket 时的模板创建与 CLI 生成。
-模板测试还覆盖未核对日期占位、编辑后沿用原 CLI 生成、模板覆盖限制、父目录链接、目录越界和参数错误不回显。
-这些检查不能证明浏览器扩展、操作系统、云同步、打印机或真实灾害使用场景的隐私与可靠性。
-贡献前另见 [隐私检查说明](docs/privacy.md) 的仓库检查流程。
+Functional tests cover malicious HTML escaping, required fields and type/length limits, invalid/duplicate/oversized JSON, errors that do not echo input,
+overwrite and link protection, POSIX permissions, absence of external resource markup, and template creation and CLI generation with Python sockets disabled.
+Template tests also cover the unreviewed date placeholder, generation through the original CLI after editing, overwrite restrictions, parent-directory links, directory boundaries, and argument errors that do not echo supplied values.
+These checks do not establish the privacy or reliability of browser extensions, operating systems, cloud synchronization, printers, or real disaster use.
+Before contributing, also follow the repository checks in the [privacy guide](docs/privacy.md).
 
-## 首期项目：家庭离线应急预案
+## First project: an offline household plan
 
-目标是让一个家庭在断网后，仍能找到事先约定的紧急联系人和集合安排。
+The goal is to help a household find previously agreed emergency contacts and meeting arrangements after losing network access.
 
-已实现的最小流程与后续目标：
+Implemented workflow and remaining goals:
 
-- 已实现：通过本地 JSON 填写联系人、集合安排和可选支持需求，生成无外部资源的 HTML。
-- 已实现：中英文栏目、打印样式、窄屏 CSS 和全虚构示例；单 Chrome 桌面/窄屏与 PDF 检查通过，跨浏览器和实体打印仍待验证。
-- 已实现：保存 JSON 后修改并重新运行，输出可以附填写者提供的来源与核对日期。
-- 已实现：`init` / `template` 在 `private-input/` 创建待核对模板，不用修改仓库的虚构示例；保留原来的输入文件 CLI 用法。
-- 待实现：图形编辑界面、预案 HTML 反向导入、地区官方资料核验与真实使用反馈。
+- Implemented: enter contacts, meeting arrangements, and optional support needs in local JSON and generate HTML without external resources.
+- Implemented: English section labels, print styles, narrow-screen CSS, and an entirely fictional example. The earlier bilingual presentation passed one Chrome desktop/narrow-viewport and PDF check; the English presentation has passed a fresh desktop/narrow-screen check, while its PDF pagination, other browsers, and physical printing still need checking.
+- Implemented: save JSON, edit it, and generate again; output can include sources and review dates supplied by the person completing the plan.
+- Implemented: `init` / `template` creates an unreviewed draft in `private-input/` without modifying the repository example and preserves the original input-file CLI usage.
+- Planned: a graphical editor, importing plan HTML, regional official-source verification, and real usage feedback.
 
-当前格式为版本 1 的 JSON，技术实现为 Python 标准库；尚未选定或验证首批地区资料。
-公共仓库和问题反馈应使用虚构数据，避免公开真实联系人、住址或健康信息。
+The current format is JSON schema version 1, implemented with Python's standard library. Initial regional sources have not yet been selected or verified.
+Use fictional data in public repositories and feedback; do not publish real contact details, addresses, or health information.
 
-## 首期工作与验收标准
+## Initial work and acceptance criteria
 
-| 优先级 | 工作 | 完成时应提供的证据 |
+| Priority | Work | Evidence required for completion |
 |---|---|---|
-| P0 | 本地填写、预览与打印 | 可运行版本、虚构示例、运行说明及打印完整性检查 |
-| P1 | 离线使用与个人数据保护 | 断网运行记录，以及填写内容未发送至外部服务器的检查结果 |
-| P1 | 导出与重新导入 | 输入与重新导入后的关键字段一致，错误文件有清楚提示 |
-| P1 | 移动端、键盘操作和中英文支持 | 核心流程在目标设备和输入方式下的检查记录 |
-| P2 | 官方资料维护 | 每条已核验资料记录来源、版本、核对日期及适用地区 |
+| P0 | Local editing, previewing, and printing | Runnable version, fictional example, instructions, and a print completeness check |
+| P1 | Offline use and personal data protection | Offline execution record and checks that entered content was not sent to external servers |
+| P1 | Export and reimport | Key fields preserved after reimport and clear handling of invalid files |
+| P1 | Mobile use, keyboard operation, and English presentation | Check records for the target devices and input methods |
+| P2 | Official-source maintenance | Source, version, review date, and applicable region recorded for every verified resource |
 
-首个效果里程碑：试用者在一个明确的断网场景中成功找到联系人和集合安排，
-并在同意的前提下留下不含个人敏感信息的反馈及遇到的困难。
+The first outcome milestone is a participant successfully finding contacts and meeting arrangements in a defined offline scenario,
+then voluntarily providing feedback about difficulties without sensitive personal information.
 
-## 后续候选方向
+## Possible future directions
 
-- 小型组织的备份恢复演练与验证报告。
-- 服务供应商依赖清单及替代方案评估。
-- 原始信息来源追踪与文件版本比较。
-- 断网等危机场景的桌面演练脚本与记录。
+- Backup recovery drills and verification reports for small organizations.
+- Service-provider dependency inventories and alternative assessments.
+- Original-source tracking and document version comparison.
+- Tabletop exercises and records for network outages and other crisis scenarios.
 
-这些方向仍是候选，需要先明确用户需求、已有工具和可验证的改进空间。
+These remain candidates. Each needs a clear user need, a review of existing tools, and a verifiable opportunity for improvement.
 
-## 来源与证据边界
+## Sources and evidence boundaries
 
-以下是待复核的官方研究线索，本仓库尚未重新核验其当前内容、附件或政策状态：
+The following official research leads await review. This repository has not rechecked their current content, attachments, or policy status:
 
-- [瑞士政府相关公告](https://www.admin.ch/en/newnsb/zR3tvgIy1qIm)
-- [SEPOS 安全政策战略专题页](https://www.sepos.admin.ch/en/security-policy-strategy)
+- [Relevant Swiss government announcement](https://www.admin.ch/en/newnsb/zR3tvgIy1qIm)
+- [SEPOS security policy strategy page](https://www.sepos.admin.ch/en/security-policy-strategy)
 
-后续资料记录应区分原文事实、项目解释、设计建议和实际验证结果，
-并附文档版本、具体位置和核对日期。政策获批、措施规划、修法生效及实际执行是不同状态。
-本项目不将未经复核的措施编号、日期或摘要作为已确认的政策事实。
+Future records should distinguish source statements, project interpretations, design proposals, and actual validation results,
+with document versions, precise locations, and review dates. Policy approval, planned measures, legislation taking effect, and actual implementation are distinct states.
+This project does not treat unreviewed measure numbers, dates, or summaries as confirmed policy facts.
 
-## 参与方式
+## Contributing
 
-阅读 [路线图](ROADMAP.md) 和 [贡献指南](CONTRIBUTING.md)，选择范围明确的工作并通过 issue 与 PR 协作。
-代码、资料纠错、翻译、演练设计和使用反馈都可以贡献。
-每条 PR 应说明关联问题、实际改动、验证证据和仍未完成的事项。
+Read the [roadmap](ROADMAP.md) and [contribution guide](CONTRIBUTING.md), choose a clearly scoped task, and collaborate through issues and PRs.
+Contributions can include code, source corrections, language editing, exercise design, and usage feedback.
+Each PR should describe the related problem, actual changes, validation evidence, and remaining work.

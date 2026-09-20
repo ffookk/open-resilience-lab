@@ -1,33 +1,40 @@
-# 浏览器与打印检查记录
+# Browser and print check record
 
-## 2026-09-20：虚构预案的单一浏览器检查
+## 2026-09-20: English-only screen check
 
-使用仓库 `examples/fictional-household.json` 生成 HTML，以全新、离线的浏览器上下文打开。全部数据均为虚构或占位文字。
+The translated fictional example was regenerated and opened in an offline Chrome 153.0.8010.53 context. Desktop (1280 x 900) and narrow (390 x 844) screenshots were visually reviewed: all sections were visible, text wrapped without observed clipping, and neither viewport had horizontal overflow. The document declares `lang="en"`, and no CJK text was found in the rendered body.
 
-| 检查 | 本次结果 |
-| --- | --- |
-| 浏览器 | Google Chrome 153.0.8010.53，headless |
-| 桌面视口 | 1280 × 900；未检测到水平溢出 |
-| 移动视口 | 390 × 844；未检测到水平溢出 |
-| 页面发起的 HTTP/HTTPS 请求 | 0 |
-| 页面脚本及外部资源元素 | 0 |
-| 打印输出 | 浏览器生成 A4 PDF，2 页；关闭浏览器页眉页脚 |
-| 页面视觉检查 | 两页文字清晰，未见裁切、重叠或缺失章节 |
-| PDF 内容检查 | 预案章节可提取；未发现本机文件路径或 file URL |
+The page initiated 0 HTTP/HTTPS requests and contained 0 scripts or external resource elements. This check covered one fictional example and one browser engine. PDF pagination, physical printing, screen readers, and maximum-length content were not rechecked for the English presentation; the earlier two-page PDF result below remains historical.
 
-PDF 文字提取中个别汉字使用兼容字形，比较标题时应先做 Unicode NFKC 规范化；页面实际显示正常。
+## 2026-09-20: historical single-browser check of the fictional plan
 
-## 复现方法
+This record covers the earlier bilingual presentation, before the English-only update. Its two-page result does not establish the current English layout or pagination; repeat the checks after presentation changes.
+HTML was generated from `examples/fictional-household.json` and opened in a fresh offline browser context. All data was fictional or placeholder text.
 
-1. 按 README 的演示命令生成虚构 HTML。
-   若目标已存在，可指定新的 `--output private-output/browser-check.html`；重跑时先核对已有文件用途。
-2. 在独立浏览器配置中断网打开本地文件，检查标题、联系人、集合安排、家庭成员、备注与来源栏目。
-3. 分别以桌面与窄屏视口查看，并检查是否有水平滚动或内容裁切。
-   后续检查长内容时应另建虚构样例，单独记录结果；本次样例通过不能代表最长字段组合通过。
-4. 使用浏览器打印到 A4 PDF，关闭页眉页脚，检查每页内容、分页和可提取文字。
-   若改变纸张、缩放比例或边距，应记录设置并重新检查分页，不沿用表中的两页结论。
-5. 如保存截图或 PDF，只使用虚构样例，放入被忽略的本地目录，不提交个人预案。
+| Check | Recorded result |
+|---|---|
+| Browser | Google Chrome 153.0.8010.53, headless |
+| Desktop viewport | 1280 × 900; no horizontal overflow detected |
+| Mobile-sized viewport | 390 × 844; no horizontal overflow detected |
+| Page-initiated HTTP/HTTPS requests | 0 |
+| Page scripts and external resource elements | 0 |
+| Print output | Browser-generated A4 PDF, 2 pages; browser headers and footers disabled |
+| Visual page check | Text legible on both pages; no observed clipping, overlap, or missing sections |
+| PDF content check | Plan sections extractable; no local file paths or file URLs found |
 
-## 本次检查不覆盖的内容
+Some characters in extracted PDF text used compatibility glyphs. Apply Unicode NFKC normalization before comparing headings; the visual rendering was correct in that check.
 
-这是一个浏览器引擎、一个虚构样例的检查，未完成跨浏览器、屏幕阅读器、实体打印、真实家庭演练或具体地区政策验收。页面请求观察也不是对整个浏览器进程的网络审计。相关后续工作仍在 Issue #3 中跟踪。
+## Reproduce the check
+
+1. Generate the fictional HTML using the README demonstration command.
+   If the destination exists, choose another with `--output private-output/browser-check.html`; check the purpose of existing files before rerunning.
+2. Open the local file offline in a separate browser profile and inspect the title, contacts, meeting arrangements, household members, notes, and sources.
+3. Inspect desktop and narrow viewports for horizontal scrolling and clipped content.
+   Create a separate fictional sample for long-content checks and record its results separately; one passing sample does not establish that all maximum-length field combinations fit.
+4. Print to A4 PDF with browser headers and footers disabled; inspect each page, pagination, and extracted text.
+   Record changes to paper size, scaling, or margins and recheck pagination instead of reusing the two-page result above.
+5. Save screenshots and PDFs only from fictional samples in ignored local directories. Never commit personal plans.
+
+## What this check does not cover
+
+This was a check of one browser engine and one fictional sample. Cross-browser use, screen readers, physical printing, real household exercises, and regional policy acceptance remain unverified. Observing page requests is not a network audit of the entire browser process. Follow-up work is tracked in Issue #3.
