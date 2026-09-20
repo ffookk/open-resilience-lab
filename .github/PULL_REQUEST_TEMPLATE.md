@@ -1,20 +1,20 @@
-## 解决的问题
+## Problem
 
-说明具体问题，以及本次改动带来的结果。
+Describe the concrete problem and the result this change provides.
 
-## 改动与来源
+## Changes and sources
 
-列出核心改动；涉及事实或数据时附原始来源、证据位置和核验日期。
+List the main changes. For facts or data, include original sources, precise evidence locations, and review dates.
 
-## 验证
+## Validation
 
-说明如何验证、实际观察到什么；未验证的部分请明确写出。
+Explain how you checked the change and what you observed. Clearly identify anything not verified.
 
-## 局限与后续
+## Limitations and follow-up
 
-列出适用范围、仍待核实的事项和后续独立工作。
+Describe the applicable scope, unresolved questions, and separate follow-up work.
 
-- [ ] 已区分已验证结果与待完成计划。
-- [ ] 涉及 HTML 输出时，已说明虚构样例、浏览器与打印检查范围，并将未执行的检查标为未验证；不适用时已说明。
-- [ ] 未提交密钥、凭据或私密个人数据。
-- [ ] 外部内容的来源与使用条件已检查，或已明确标记为待核验线索且未复制其内容。
+- [ ] I have distinguished verified results from planned work.
+- [ ] For HTML output, I have described the fictional sample and the browser/print check scope, marked checks not performed as unverified, or explained why they do not apply.
+- [ ] I have not submitted secrets, credentials, or private personal data.
+- [ ] I have checked the sources and usage terms for external content, or clearly marked it as an unverified lead without copying its content.

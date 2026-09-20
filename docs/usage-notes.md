@@ -1,18 +1,18 @@
-# 使用细节
+# Usage notes
 
-- JSON 字段名区分大小写，例如 `title` 不能写为 `Title`。
-- `schema_version` 必须写作整数 `1`；字符串 `"1"` 和布尔值 `true` 都不接受。
-- 可选文本 `notes` 和 `household[].needs` 不填写时应省略字段；写成空字符串或 `null` 会校验失败。
-- 可选列表 `household` 和 `sources` 可以省略或写成 `[]`；不能写成 `null`。
-- 家庭成员已填写 `name` 但省略 `needs` 时，HTML 会显示“未填写 / Not provided”。
-- 文本首尾空白不会自动删除；仅由空白组成的文本会被拒绝。
-- 字段长度按 Python 字符串字符数计算，整个文件的 256 KiB 限制按 UTF-8 字节数计算。
-- 普通文本可包含换行与制表符；在 JSON 字符串中须写成 `\n`、`\t` 等合法转义。
-- 重复键会在任何对象层级被拒绝，联系人等嵌套对象也不能重复写同一个字段。
-- 输入须使用标准 JSON；注释和最后一项后的多余逗号不被接受。
-- 保存输入时选择不带 BOM 的 UTF-8；当前读取器不会剥离 UTF-8 BOM。
-- 生成命令按内容读取 JSON，不要求输入文件以 `.json` 结尾；模板命令的输出则要求 `.json` 扩展名。
-- 模板目标路径不得包含 `..`，即使路径最终仍指向 `private-input/` 内也会拒绝。
-- `contacts[].contact` 是普通文本；工具不检查号码格式，也不会拨号、发送消息或确认联系人可用。
-- 日期校验只检查日历日期和 `YYYY-MM-DD` 格式，不拒绝未来日期；仍须填写实际核对日期。
-- `region` 是填写者提供的文本标签；不会转换为行政区代码，也不会自动选择地区规则。
+- JSON field names are case-sensitive: use `title`, not `Title`.
+- `schema_version` must be the integer `1`; the string `"1"` and boolean `true` are rejected.
+- Omit optional text fields `notes` and `household[].needs` when unused; empty strings and `null` fail validation.
+- Optional lists `household` and `sources` may be omitted or set to `[]`, but not `null`.
+- If a household member has a `name` but no `needs`, the HTML displays "Not provided".
+- Leading and trailing whitespace is not automatically removed; whitespace-only text is rejected.
+- Field lengths use Python string character counts. The 256 KiB file limit uses UTF-8 byte counts.
+- Plain text may contain newlines and tabs; JSON strings must encode them with valid escapes such as `\n` and `\t`.
+- Duplicate keys are rejected at every object level, including nested objects such as contacts.
+- Input must be standard JSON; comments and trailing commas are not accepted.
+- Save input as UTF-8 without a BOM; the current reader does not strip a UTF-8 BOM.
+- The generation command reads JSON by content and does not require a `.json` input extension. The template command does require a `.json` output extension.
+- Template destination paths must not contain `..`, even if the resolved path would remain inside `private-input/`.
+- `contacts[].contact` is plain text. The tool does not validate phone number formats, make calls, send messages, or confirm contact availability.
+- Date validation checks calendar validity and `YYYY-MM-DD` format, but does not reject future dates. Enter the actual review date.
+- `region` is a text label supplied by the person completing the plan; it is not converted into an administrative code and does not select regional rules.
