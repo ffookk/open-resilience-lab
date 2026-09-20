@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "title": "虚构家庭演示 · Fictional household example",
+  "region": "虚构示例地区（使用前填写并核验自己的地区）",
+  "reviewed_on": "2026-09-20",
+  "contacts": [
+    {
+      "name": "示例联系人甲（虚构）",
+      "role": "家庭事先约定的联系人",
+      "contact": "[在本地填写联系方式；此处没有真实号码]"
+    }
+  ],
+  "meeting_points": [
+    {
+      "label": "集合地点 A（占位）",
+      "instructions": "[在本地填写家庭约定地点与备用安排；此处不是具体安全建议]"
+    }
+  ],
+  "household": [
+    {"name": "示例成员乙（虚构）", "needs": "[仅填写必要的支持需求；避免多余健康信息]"}
+  ],
+  "notes": "这是虚构示例，不是可直接使用的应急预案。请在本地复制、修改、与家庭成员确认并按地区官方信息核对。",
+  "sources": []
+}
