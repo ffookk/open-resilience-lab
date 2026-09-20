@@ -60,7 +60,7 @@ HTML 是预览与打印文件；更新时编辑原始 JSON 并重新生成，暂
 
 ## 输入格式与边界
 
-完整示例见 `examples/fictional-household.json`。所有对象均拒绝未知字段；文本不可为空。
+完整示例见 [虚构家庭 JSON](examples/fictional-household.json)。所有对象均拒绝未知字段；文本不可为空。
 文件必须是 UTF-8 JSON，不超过 256 KiB，拒绝重复键、无效日期和控制字符。
 
 | 字段 | 要求 |
