@@ -9,7 +9,7 @@ body:
     id: problem
     attributes:
       label: Problem and expected result
-      description: State one concrete problem and how completion can be checked.
+      description: State one concrete problem, the actual result, the expected result, and how completion can be checked.
     validations:
       required: true
   - type: textarea
