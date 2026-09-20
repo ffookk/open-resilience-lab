@@ -7,10 +7,11 @@
 
 ## 当前状态
 
-已提供一个零第三方依赖的 Python CLI 原型：从本地 JSON 生成自包含 HTML 应急预案。
+已提供一个零第三方依赖的 Python CLI 原型：创建本地可编辑 JSON 模板，再生成自包含 HTML 应急预案。
 工具不请求网络、不运行遥测，生成页没有脚本或外部资源；来源网址仅显示为文字。
 已验证输入校验、HTML 转义、覆盖保护、文件权限和禁用 socket 条件下的生成流程。
-目前还没有真实家庭试用、浏览器打印完整性、移动设备或屏幕阅读器验证记录，也没有地区政策核验结果。
+全虚构示例已通过单一 Chrome 引擎的离线桌面/窄屏查看与两页 A4 PDF 检查，见 [浏览器检查记录](docs/browser-check.md)。
+跨浏览器、实体移动设备、屏幕阅读器、实体打印与真实家庭试用仍待验证，也没有地区政策核验结果。
 
 ## 本地运行
 
@@ -25,18 +26,28 @@ python3 resilience_plan.py examples/fictional-household.json
 输出含内嵌打印样式，但不同浏览器和长内容的分页仍需自行预览。
 程序不主动打开浏览器，不会在终端回显家庭资料或输入路径。
 
-准备自己的预案时，将示例复制到忽略的 `private-input/` 目录，再使用本地编辑器修改：
+准备自己的预案时，在仓库根目录执行 `init`，直接在忽略的 `private-input/` 目录生成新模板：
 
 ```sh
-mkdir -m 700 -p private-input
-cp examples/fictional-household.json private-input/household.json
-chmod 600 private-input/household.json
-# 在受信任的本地编辑器中编辑该 JSON，然后生成：
+python3 resilience_plan.py init
+# 在受信任的本地编辑器中打开 private-input/household.json：
+# 替换全部占位内容；家庭核对完成后填写 reviewed_on 的实际日期，再生成：
 python3 resilience_plan.py private-input/household.json --output private-output/my-plan.html
 ```
 
-上述文件权限命令适用于 macOS / Linux；Windows 用户应使用系统的访问权限设置。
-已有输出默认拒绝覆盖；确认需要更新时加 `--force`。即使加上该选项，也拒绝覆盖输入文件、
+模板的 `reviewed_on` 初始值为 `YYYY-MM-DD`，**故意不能通过日期校验**，也不会自动填入今天或声称已经家庭审核。
+只在实际核对之后填入核对日期。若只是试用生成和打印，请运行上面的全虚构示例。
+其他占位文本不会被工具自动识别或核实，必须由填写者逐项替换和核对；通过格式校验不代表内容已经审核。
+
+`template` 是 `init` 的别名；`python3 resilience_plan.py init --help` 显示模板命令帮助。
+可用 `--output private-input/another-plan.json` 创建另一个模板，目标必须位于当前目录的
+`private-input/` 下且使用 `.json` 扩展名；模板目标和其中的目录不能是符号链接。
+已有文件默认拒绝覆盖，`init --force` **仅允许重建完全未编辑的本工具模板**；已填写预案、
+其他 JSON、硬链接和不相关源文件均不能用它覆盖。需要新的模板时选择新文件名。
+JSON 和新建的每一级模板目录在 POSIX 系统上分别使用 `0600`、`0700` 权限；
+既有目录权限不会被更改，Windows 用户应使用系统的访问权限设置。
+
+已有 HTML 输出默认拒绝覆盖；确认需要更新时加 `--force`。即使加上该选项，也拒绝覆盖输入文件、
 输入的硬链接或任何输出符号链接。程序创建的 HTML 在 POSIX 系统上使用 `0600` 权限，
 新建的直接输出目录使用 `0700`；既有目录权限不会被更改。
 
@@ -71,7 +82,8 @@ python3 -m unittest discover -s tests -v
 ```
 
 功能测试覆盖恶意 HTML 转义、必填与类型/长度限制、无效/重复/过大 JSON、错误不回显输入、
-覆盖与链接保护、POSIX 权限、外部资源标记缺失，以及禁用 Python socket 时的 CLI 生成。
+覆盖与链接保护、POSIX 权限、外部资源标记缺失，以及禁用 Python socket 时的模板创建与 CLI 生成。
+模板测试还覆盖未核对日期占位、编辑后沿用原 CLI 生成、模板覆盖限制、父目录链接、目录越界和参数错误不回显。
 这些检查不能证明浏览器扩展、操作系统、云同步、打印机或真实灾害使用场景的隐私与可靠性。
 贡献前另见 `docs/privacy.md` 的仓库检查流程。
 
@@ -82,8 +94,9 @@ python3 -m unittest discover -s tests -v
 已实现的最小流程与后续目标：
 
 - 已实现：通过本地 JSON 填写联系人、集合安排和可选支持需求，生成无外部资源的 HTML。
-- 已实现：中英文栏目、打印样式、窄屏 CSS 和全虚构示例；设备与打印效果仍待验证。
+- 已实现：中英文栏目、打印样式、窄屏 CSS 和全虚构示例；单 Chrome 桌面/窄屏与 PDF 检查通过，跨浏览器和实体打印仍待验证。
 - 已实现：保存 JSON 后修改并重新运行，输出可以附填写者提供的来源与核对日期。
+- 已实现：`init` / `template` 在 `private-input/` 创建待核对模板，不用修改仓库的虚构示例；保留原来的输入文件 CLI 用法。
 - 待实现：图形编辑界面、预案 HTML 反向导入、地区官方资料核验与真实使用反馈。
 
 当前格式为版本 1 的 JSON，技术实现为 Python 标准库；尚未选定或验证首批地区资料。

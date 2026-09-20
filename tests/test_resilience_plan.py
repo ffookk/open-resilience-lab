@@ -134,5 +134,117 @@ class PlanTests(unittest.TestCase):
             self.assertIn("Fictional household example", output.read_text())
 
 
+class TemplateTests(unittest.TestCase):
+    def setUp(self):
+        self.previous_directory = Path.cwd()
+        self.workspace = tempfile.TemporaryDirectory()
+        os.chdir(self.workspace.name)
+        self.addCleanup(self.workspace.cleanup)
+        self.addCleanup(os.chdir, self.previous_directory)
+
+    def run_cli(self, arguments, expected=0):
+        with contextlib.redirect_stdout(io.StringIO()) as output, contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(app.main(arguments), expected)
+        return output.getvalue() + errors.getvalue()
+
+    def test_init_creates_an_unreviewed_draft_with_private_permissions(self):
+        message = self.run_cli(["init"])
+        output = Path(app.TEMPLATE_PATH)
+        draft = json.loads(output.read_text())
+        self.assertEqual(draft["reviewed_on"], "YYYY-MM-DD")
+        self.assertEqual(draft["sources"], [])
+        self.assertIn("after household review", message)
+        self.assertIn("intentionally fails", message)
+        with self.assertRaises(app.PlanError):
+            app.load_plan(output)
+        if os.name == "posix":
+            self.assertEqual(stat.S_IMODE(output.stat().st_mode), 0o600)
+            self.assertEqual(stat.S_IMODE(output.parent.stat().st_mode), 0o700)
+
+    def test_edited_template_generates_using_legacy_cli(self):
+        self.run_cli(["template"])
+        # Replacing the placeholders with the fictional fixture simulates local editing.
+        Path(app.TEMPLATE_PATH).write_text(EXAMPLE.read_text(), encoding="utf-8")
+        self.run_cli([app.TEMPLATE_PATH])
+        self.assertIn("Fictional household example", Path("private-output/emergency-plan.html").read_text())
+
+    def test_overwrite_requires_force_and_only_allows_an_unchanged_template(self):
+        self.run_cli(["init"])
+        before = Path(app.TEMPLATE_PATH).read_bytes()
+        self.run_cli(["init"], expected=2)
+        self.assertEqual(Path(app.TEMPLATE_PATH).read_bytes(), before)
+        self.run_cli(["init", "--force"])
+        self.assertEqual(Path(app.TEMPLATE_PATH).read_bytes(), before)
+        private_content = '{"notes": "DO_NOT_ECHO_PRIVATE_DATA"}'
+        Path(app.TEMPLATE_PATH).write_text(private_content)
+        message = self.run_cli(["init", "--force"], expected=2)
+        self.assertNotIn("DO_NOT_ECHO", message)
+        self.assertEqual(Path(app.TEMPLATE_PATH).read_text(), private_content)
+
+    def test_destination_rejects_source_files_parent_traversal_and_other_directories(self):
+        Path("resilience_plan.py").write_text("source file")
+        for destination in ("resilience_plan.py", "examples/sample.json", "household.json", "private-input",
+                            "private-input/../household.json", "private-input/source.py"):
+            with self.subTest(destination=destination):
+                self.run_cli(["init", "--output", destination, "--force"], expected=2)
+        self.assertEqual(Path("resilience_plan.py").read_text(), "source file")
+        self.assertFalse(Path("household.json").exists())
+        self.assertFalse(Path("examples").exists())
+
+    def test_nested_template_directories_are_private(self):
+        output = Path("private-input/nested/another/draft.json")
+        self.run_cli(["init", "--output", str(output)])
+        self.assertEqual(output.read_text(), app.template_document())
+        if os.name == "posix":
+            for directory in (output.parent, output.parent.parent, Path("private-input")):
+                self.assertEqual(stat.S_IMODE(directory.stat().st_mode), 0o700)
+
+    @unittest.skipUnless(os.name == "posix", "POSIX link behavior")
+    def test_linked_private_directory_cannot_escape_into_another_location(self):
+        Path("unrelated").mkdir()
+        Path("private-input").symlink_to(Path("unrelated").resolve(), target_is_directory=True)
+        self.run_cli(["init", "--force"], expected=2)
+        self.assertEqual(list(Path("unrelated").iterdir()), [])
+
+    @unittest.skipUnless(os.name == "posix", "POSIX link behavior")
+    def test_nested_directory_and_output_links_are_rejected(self):
+        Path("private-input").mkdir()
+        Path("unrelated").mkdir()
+        Path("private-input/nested").symlink_to(Path("unrelated").resolve(), target_is_directory=True)
+        self.run_cli(["init", "--output", "private-input/nested/draft.json", "--force"], expected=2)
+        target = Path("unrelated/original.json")
+        for exists in (False, True):
+            if exists:
+                target.write_text("original")
+            link = Path(app.TEMPLATE_PATH)
+            link.symlink_to(target.resolve())
+            self.run_cli(["init", "--force"], expected=2)
+            self.assertTrue(link.is_symlink())
+            link.unlink()
+        self.assertEqual(target.read_text(), "original")
+        self.assertFalse(Path("unrelated/draft.json").exists())
+
+    @unittest.skipUnless(os.name == "posix", "POSIX link behavior")
+    def test_force_refuses_hardlinked_template(self):
+        self.run_cli(["init"])
+        os.link(app.TEMPLATE_PATH, "other.json")
+        self.run_cli(["init", "--force"], expected=2)
+        self.assertEqual(Path("other.json").read_text(), app.template_document())
+
+    def test_cli_argument_errors_never_echo_private_values(self):
+        for arguments in (["init", "--DO_NOT_ECHO_PRIVATE_DATA"],
+                          ["--DO_NOT_ECHO_PRIVATE_DATA"],
+                          ["init", "--output", "private-input/DO_NOT_ECHO_PRIVATE_DATA\x00.json"],
+                          ["init", "--output"]):
+            message = self.run_cli(arguments, expected=2)
+            self.assertNotIn("DO_NOT_ECHO_PRIVATE_DATA", message)
+            self.assertNotIn(self.workspace.name, message)
+
+    def test_init_requires_no_network(self):
+        from unittest.mock import patch
+        with patch("socket.socket", side_effect=AssertionError("Network is forbidden")):
+            self.run_cli(["init"])
+
+
 if __name__ == "__main__":
     unittest.main()

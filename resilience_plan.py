@@ -13,10 +13,40 @@ import tempfile
 from urllib.parse import urlsplit
 
 MAX_INPUT_BYTES = 256 * 1024
+TEMPLATE_PATH = "private-input/household.json"
 
 
 class PlanError(ValueError):
     """An intentionally data-free message that is safe to show in a terminal."""
+
+
+class PrivateArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        # argparse's normal error includes supplied values, possibly private paths.
+        raise PlanError("Invalid command arguments. Use --help for usage.")
+
+
+def template_document():
+    """An editable draft; never invent a household review or a verified source."""
+    plan = {
+        "schema_version": 1,
+        "title": "[填写预案名称 / Enter a plan title]",
+        "region": "[填写适用地区 / Enter the applicable region]",
+        "reviewed_on": "YYYY-MM-DD",
+        "contacts": [{
+            "name": "[填写联系人 / Enter a contact name]",
+            "role": "[填写约定角色 / Enter the agreed role]",
+            "contact": "[在本地填写联系方式 / Enter contact details locally]",
+        }],
+        "meeting_points": [{
+            "label": "[填写集合安排名称 / Enter a meeting arrangement label]",
+            "instructions": "[与家庭成员约定后填写 / Enter instructions agreed with your household]",
+        }],
+        "household": [],
+        "notes": "待填写和家庭核对的模板，不能直接作为应急预案。替换所有占位内容；完成家庭核对后，将 reviewed_on 填为实际核对日期。 / Draft only: replace all placeholders and enter the actual household review date after reviewing the plan together.",
+        "sources": [],
+    }
+    return json.dumps(plan, ensure_ascii=False, indent=2) + "\n"
 
 
 def _object(value, required, optional=()):
@@ -159,15 +189,24 @@ This tool organizes household decisions; it provides no medical advice and does 
 '''
 
 
-def save_plan(document, output_path, input_path, force=False):
+def _save_private_file(document, output_path, protected_paths=(), force=False, replace_template=False):
     """Write restrictive files; default exclusive creation, explicit atomic replacement."""
     output = Path(output_path)
-    source = Path(input_path)
     try:
-        if output.resolve() == source.resolve() or (output.exists() and os.path.samefile(output, source)):
-            raise PlanError("Output must not overwrite the input file.")
+        for protected in protected_paths:
+            source = Path(protected)
+            if output.resolve() == source.resolve() or (output.exists() and os.path.samefile(output, source)):
+                raise PlanError("Output must not overwrite the input file.")
         if output.is_symlink() or (output.exists() and not output.is_file()):
             raise PlanError("Output must be a regular file, not a link or directory.")
+        if force and replace_template and output.exists():
+            # Even --force must never reset a filled household plan or source file.
+            if output.stat().st_nlink != 1 or output.stat().st_size > MAX_INPUT_BYTES:
+                raise PlanError("Only an unchanged template can be replaced. Choose a new template file.")
+            with output.open("rb") as stream:
+                existing = stream.read(MAX_INPUT_BYTES + 1)
+            if existing != document.encode("utf-8"):
+                raise PlanError("Only an unchanged template can be replaced. Choose a new template file.")
         output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         if not force:
             fd = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -193,13 +232,67 @@ def save_plan(document, output_path, input_path, force=False):
         raise PlanError("Unable to save the output file. Check local permissions and storage.") from None
 
 
-def main(argv=None):
-    parser = argparse.ArgumentParser(description="Generate an offline plan locally. Input and HTML contain private data; never commit real plans.")
-    parser.add_argument("input", help="local UTF-8 JSON plan")
-    parser.add_argument("--output", default="private-output/emergency-plan.html", help="local HTML destination (default: private-output/emergency-plan.html)")
-    parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
-    args = parser.parse_args(argv)
+def save_plan(document, output_path, input_path, force=False):
+    _save_private_file(document, output_path, (input_path,), force=force)
+
+
+def save_template(output_path=TEMPLATE_PATH, force=False):
+    """Keep drafts under the local private-input directory and reject linked paths."""
     try:
+        base = Path.cwd().resolve()
+        root = base / "private-input"
+        supplied = Path(output_path)
+        output = supplied if supplied.is_absolute() else base / supplied
+        if ".." in output.parts:
+            raise PlanError("Template destination must be a JSON file inside private-input without parent traversal.")
+        try:
+            relative = output.relative_to(root)
+        except ValueError:
+            raise PlanError("Template destination must be a JSON file inside private-input.") from None
+        if not relative.parts or output.suffix.lower() != ".json":
+            raise PlanError("Template destination must be a JSON file inside private-input.")
+        current = root
+        for component in (None, *relative.parts):
+            if component is not None:
+                current = current / component
+            if current.is_symlink():
+                raise PlanError("Template destination and its directories must not be symbolic links.")
+        # Create each new private directory with restrictive permissions, including
+        # intermediate directories (Path.mkdir(parents=True) would use defaults).
+        current = root
+        for component in (None, *relative.parts[:-1]):
+            if component is not None:
+                current = current / component
+            current.mkdir(mode=0o700, exist_ok=True)
+        _save_private_file(template_document(), output, force=force, replace_template=True)
+    except PlanError:
+        raise
+    except (OSError, ValueError, RuntimeError):
+        raise PlanError("Unable to save the template. Check local permissions and storage.") from None
+
+
+def main(argv=None):
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    initializing = bool(arguments) and arguments[0] in ("init", "template")
+    parser = PrivateArgumentParser(
+        description=("Create a private editable JSON draft. Review it before generating a plan." if initializing else
+                     "Generate an offline plan locally. Input and HTML contain private data; never commit real plans."),
+        epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else
+                "Start a new draft: python3 resilience_plan.py init (alias: template). Use init --help for details."))
+    if initializing:
+        parser.add_argument("--output", default=TEMPLATE_PATH, help="JSON destination within private-input (default: private-input/household.json)")
+        parser.add_argument("--force", action="store_true", help="replace only an unchanged template; filled plans and unrelated files remain protected")
+    else:
+        parser.add_argument("input", help="local UTF-8 JSON plan (prefix ./ for a file named init or template)")
+        parser.add_argument("--output", default="private-output/emergency-plan.html", help="local HTML destination (default: private-output/emergency-plan.html)")
+        parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
+    try:
+        args = parser.parse_args(arguments[1:] if initializing else arguments)
+        if initializing:
+            save_template(args.output, args.force)
+            print("Template saved locally. Replace every placeholder and enter reviewed_on only after household review. "
+                  "The YYYY-MM-DD placeholder intentionally fails date validation. Keep the template private.")
+            return 0
         plan = load_plan(args.input)
         save_plan(render_plan(plan), args.output, args.input, args.force)
     except PlanError as exc:

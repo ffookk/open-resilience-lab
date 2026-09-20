@@ -25,5 +25,7 @@ jobs:
         run: python scripts/privacy_check.py --history
       - name: Unit tests
         run: python -m unittest discover -s tests -v
-      - name: Validate documented synthetic example
+      - name: Validate documented examples
         run: python resilience_plan.py examples/fictional-household.json --output private-output/ci-demo.html
+      - name: Create a private draft template
+        run: python resilience_plan.py init --output private-input/ci-draft.json
