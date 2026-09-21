@@ -21,6 +21,7 @@ Acceptance: every specific policy or preparedness requirement can be traced to i
 - [x] Recheck the English fictional presentation at desktop and narrow viewports in one offline Chrome context.
 - [ ] Recheck PDF pagination for the English presentation.
 - [ ] Complete browser viewing with a real network disconnection, long-plan pagination, and physical printing checks.
+- [x] Add a guided local terminal wizard with validated retries, optional fields, hidden prompts, cancellation, and exclusive private saving.
 - [ ] Add a graphical editor and HTML import.
 
 Current evidence: automated CLI tests, strict validation, HTML escaping, restricted file permissions, overwrite protection, absence-of-external-resources checks,

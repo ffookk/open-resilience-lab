@@ -294,6 +294,144 @@ def save_template(output_path=TEMPLATE_PATH, force=False):
         raise PlanError("Unable to save the template. Check local permissions and storage.") from None
 
 
+class WizardCancelled(Exception):
+    """The user stopped before any plan was published."""
+
+
+def _read_private_answer(prompt):
+    """Refuse getpass's echoing fallback instead of exposing a private answer."""
+    import getpass
+    import warnings
+    try:
+        trusted = sys.stdin is not None and sys.stderr is not None and sys.stdin.isatty() and sys.stderr.isatty()
+    except (OSError, ValueError):
+        trusted = False
+    if not trusted:
+        raise PlanError("The wizard requires a trusted interactive terminal with hidden input.") from None
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", getpass.GetPassWarning)
+            return getpass.getpass(prompt, stream=sys.stderr)
+    except (getpass.GetPassWarning, OSError, ValueError):
+        raise PlanError("Hidden terminal input is unavailable. No plan was saved.") from None
+
+
+def collect_plan(read_answer=None, report=None):
+    """Collect synthetic or local private answers; injectable hooks support tests.
+
+    The reader receives fixed prompts and returns strings. The reporter only
+    receives fixed guidance, never answers. EOF and interruptions cancel.
+    """
+    read_answer = _read_private_answer if read_answer is None else read_answer
+    report = (lambda message: print(message, file=sys.stderr)) if report is None else report
+
+    def ask(prompt, check, *, optional=False):
+        while True:
+            try:
+                answer = read_answer(prompt)
+            except (EOFError, KeyboardInterrupt):
+                raise WizardCancelled from None
+            if not isinstance(answer, str):
+                raise PlanError("The interactive reader did not return text.")
+            if answer == "/cancel":
+                raise WizardCancelled
+            if optional and answer == "":
+                return None
+            try:
+                check(answer)
+            except PlanError as error:
+                report(str(error))
+                continue
+            return answer
+
+    def count(prompt, minimum, maximum):
+        def validate(value):
+            if len(value) > 2 or not value.isascii() or not value.isdecimal() or not minimum <= int(value) <= maximum:
+                raise PlanError("Enter a whole-number count within the range shown in the prompt.")
+        return int(ask(prompt, validate))
+
+    def yes(prompt):
+        def validate(value):
+            if value.lower() not in ("yes", "no"):
+                raise PlanError("Enter yes or no.")
+        return ask(prompt, validate).lower() == "yes"
+
+    report("Answers are hidden and are not repeated. Use a trusted local terminal. Type /cancel or press Ctrl-C to stop.")
+    report("Enter only necessary information already agreed by your household. This tool does not provide or verify emergency advice.")
+    if not yes("Have you reviewed the household arrangements and chosen a trusted local destination? (yes/no): "):
+        raise WizardCancelled
+    plan = {"schema_version": 1,
+            "title": ask("Plan title (up to 120 characters): ", lambda value: _text(value, 120)),
+            "region": ask("Applicable region (up to 120 characters): ", lambda value: _text(value, 120)),
+            "reviewed_on": ask("Actual household review date (YYYY-MM-DD): ", _date),
+            "contacts": [], "meeting_points": [], "household": [], "sources": []}
+    for _ in range(count("Number of contacts (1-20): ", 1, 20)):
+        report("Enter the next contact.")
+        plan["contacts"].append({"name": ask("Contact name: ", lambda value: _text(value, 200)),
+                                 "role": ask("Agreed contact role: ", lambda value: _text(value, 200)),
+                                 "contact": ask("Contact details: ", lambda value: _text(value, 200))})
+    for _ in range(count("Number of meeting arrangements (1-10): ", 1, 10)):
+        report("Enter the next meeting arrangement.")
+        plan["meeting_points"].append({"label": ask("Meeting arrangement label: ", lambda value: _text(value, 120)),
+                                       "instructions": ask("Agreed meeting instructions: ", lambda value: _text(value, 2000))})
+    for _ in range(count("Number of optional household member entries (0-20): ", 0, 20)):
+        report("Enter the next optional household member.")
+        member = {"name": ask("Member name: ", lambda value: _text(value, 120))}
+        needs = ask("Necessary support needs, or Enter to omit: ", lambda value: _text(value, 1000), optional=True)
+        if needs is not None:
+            member["needs"] = needs
+        plan["household"].append(member)
+    notes = ask("Optional notes, or Enter to omit: ", lambda value: _text(value, 4000), optional=True)
+    if notes is not None:
+        plan["notes"] = notes
+    for _ in range(count("Number of optional source entries (0-20): ", 0, 20)):
+        report("Enter the next source. Sources and review dates remain your own statements.")
+        title = ask("Source title: ", lambda value: _text(value, 200))
+        def source_url(value):
+            candidate = dict(plan, sources=[{"title": title, "url": value, "verified_on": "2000-01-01"}])
+            validate_plan(candidate)
+        url = ask("HTTPS source URL without credentials, query, or fragment: ", source_url)
+        reviewed = ask("Actual source review date (YYYY-MM-DD): ", _date)
+        plan["sources"].append({"title": title, "url": url, "verified_on": reviewed})
+    validate_plan(plan)
+    if len(json.dumps(plan, ensure_ascii=False, indent=2).encode("utf-8")) + 1 > MAX_INPUT_BYTES:
+        raise PlanError("The completed plan exceeds the input size limit. No plan was saved.")
+    if not yes("Save this reviewed local plan without displaying its contents? (yes/no): "):
+        raise WizardCancelled
+    return plan
+
+
+def run_wizard(destination, *, read_answer=None, report=None):
+    from private_storage import StorageError, check_private_destination, save_private_json
+    try:
+        check_private_destination(destination, "private-input", ".json")
+        plan = collect_plan(read_answer, report)
+        save_private_json(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", destination)
+    except StorageError as error:
+        raise PlanError(str(error)) from None
+    return plan
+
+
+def _wizard_command(arguments):
+    parser = PrivateArgumentParser(prog="resilience-plan wizard", allow_abbrev=False,
+                                   description="Create a reviewed local plan with hidden terminal prompts. No network or automatic fact verification.")
+    parser.add_argument("--output", required=True, help="new JSON destination under private-input")
+    try:
+        args = parser.parse_args(arguments)
+        run_wizard(args.output)
+    except WizardCancelled:
+        print("Plan creation cancelled before saving. No plan was saved.", file=sys.stderr)
+        return 130
+    except KeyboardInterrupt:
+        print("Plan creation interrupted. Check the destination locally; any published plan is complete.", file=sys.stderr)
+        return 130
+    except PlanError as error:
+        print("Error: " + str(error), file=sys.stderr)
+        return 2
+    print("Validated plan saved privately. Format validation and your confirmation are not independent verification.")
+    return 0
+
+
 def _print_summary(plan):
     print("SUMMARY: " + json.dumps({
         "contacts": len(plan["contacts"]), "meeting_points": len(plan["meeting_points"]),
@@ -303,13 +441,15 @@ def _print_summary(plan):
 
 def main(argv=None):
     arguments = list(sys.argv[1:] if argv is None else argv)
+    if arguments and arguments[0] == "wizard":
+        return _wizard_command(arguments[1:])
     initializing = bool(arguments) and arguments[0] in ("init", "template")
     parser = PrivateArgumentParser(
         allow_abbrev=False,
         description=("Create a private editable JSON draft. Review it before generating a plan." if initializing else
                      "Generate an offline plan locally. Input and HTML contain private data; never commit real plans."),
         epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else
-                "Start a new draft: python3 resilience_plan.py init (alias: template). Use init --help for details."))
+                "Create a plan: python3 resilience_plan.py wizard --output private-input/household.json. Or start a draft with init (alias: template)."))
     parser.add_argument("--schema-version", action="version", version="Schema version 1", help="print the supported input schema and exit")
     parser.add_argument("--quiet", action="store_true", help="suppress routine success messages; errors remain visible")
     if initializing:
