@@ -21,7 +21,7 @@ class PlanTests(unittest.TestCase):
     def test_example_validates_and_generates_english_content(self):
         document = app.render_plan(app.load_plan(EXAMPLE))
         self.assertIn("<html lang=\"en\">", document)
-        self.assertIn("<h2>Contacts</h2>", document)
+        self.assertIn('<h2 id="contacts-title">Contacts</h2>', document)
         self.assertIn(self.plan["contacts"][0]["name"], document)
         self.assertIn("@media print", document)
 

@@ -195,8 +195,8 @@ Household review date: <time datetime="''' + escape(plan["reviewed_on"]) + '''">
 <p class="notice">This file may contain private information. View it only on a trusted local device and keep local copies and printouts secure.
 Use the browser Print menu; all content is included in this file.</p>
 <nav aria-label="Plan sections"><a href="#contacts">Contacts</a> <a href="#meeting-points">Meeting points</a> <a href="#household">Household</a> ''' + ('' if omit_notes else '<a href="#notes">Notes</a> ') + '''<a href="#sources">Sources</a></nav>
-<main id="plan-content" tabindex="-1" aria-labelledby="plan-title"><section id="contacts"><h2>Contacts</h2>''' + contacts + '''</section>
-<section id="meeting-points"><h2>Agreed meeting points</h2>''' + meetings + '''</section>
+<main id="plan-content" tabindex="-1" aria-labelledby="plan-title"><section id="contacts" aria-labelledby="contacts-title"><h2 id="contacts-title">Contacts</h2>''' + contacts + '''</section>
+<section id="meeting-points" aria-labelledby="meetings-title"><h2 id="meetings-title">Agreed meeting points</h2>''' + meetings + '''</section>
 <section id="household"><h2>Household and support needs</h2>''' + (household or '<p>Not provided</p>') + '''</section>
 ''' + ('' if omit_notes else '<section id="notes"><h2>Household notes</h2><p>' + escape(plan.get("notes", "Not provided")) + '</p></section>') + '''
 <section id="sources" class="source-list"><h2>Sources entered by the author</h2><p>The tool does not fetch or verify sources; dates are supplied by the author. URLs are plain text.</p>''' + (sources or '<p>None supplied; regional requirements are unverified.</p>') + '''</section></main>
