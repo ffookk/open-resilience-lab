@@ -179,6 +179,7 @@ p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left
 .skip-link{position:absolute;left:8px;top:-100px;background:#fff;color:#182b36;padding:8px}.skip-link:focus{top:8px}@media print{.skip-link{display:none}}
 nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}nav a{color:inherit;padding:4px 8px}@media print{nav{display:none}}
 .screen-only a{color:inherit}@media print{.screen-only{display:none}}
+:focus-visible{outline:3px solid currentColor;outline-offset:4px}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid}footer{border-top:1px solid #888}}
 ''' + ''.join(presentation_style) + '''
