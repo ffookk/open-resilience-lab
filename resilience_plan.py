@@ -185,6 +185,7 @@ nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}nav a{color:inherit;paddin
 section:target{outline:2px solid currentColor;outline-offset:6px}section{scroll-margin-top:16px}
 @media screen and (prefers-color-scheme:dark){body{color:#edf3f5;background:#16242b}article{background:#20333d;border-color:#829aa6}.notice{background:#263e49}.skip-link{color:#edf3f5;background:#16242b}}
 @media (forced-colors:active){body,article,.notice,.skip-link{color:CanvasText;background:Canvas}article,.notice,h2{border-color:CanvasText}a{color:LinkText}}
+@media print{p{orphans:3;widows:3}}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid;page-break-after:avoid}article p{break-before:avoid-page}footer{border-top:1px solid #888}}
 ''' + ''.join(presentation_style) + '''
