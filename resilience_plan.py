@@ -176,14 +176,15 @@ def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, o
 *{box-sizing:border-box}body{font-family:system-ui,sans-serif;max-width:900px;margin:0 auto;padding:32px;color:#182b36;background:#f5f7f8;line-height:1.6}
 h1{line-height:1.25}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-bottom:5px}h3{margin:0 0 6px}article{background:white;border:1px solid #cbd5d9;border-radius:8px;padding:16px;margin:12px 0;break-inside:avoid}
 p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left:4px solid #59747a;padding:12px;background:#e7eff1}footer{font-size:.9rem;margin-top:32px}
+.skip-link{position:absolute;left:8px;top:-100px;background:#fff;color:#182b36;padding:8px}.skip-link:focus{top:8px}@media print{.skip-link{display:none}}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid}footer{border-top:1px solid #888}}
 ''' + ''.join(presentation_style) + '''
-</style></head><body><header><p>Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>Region: ''' + escape(plan["region"]) + '''
+</style></head><body><a class="skip-link" href="#plan-content">Skip to plan content</a><header><p>Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>Region: ''' + escape(plan["region"]) + '''
 Household review date: ''' + escape(plan["reviewed_on"]) + '''</p></header>
 <p class="notice">This file may contain private information. View it only on a trusted local device and keep local copies and printouts secure.
 Use the browser Print menu; all content is included in this file.</p>
-<main><section><h2>Contacts</h2>''' + contacts + '''</section>
+<main id="plan-content" tabindex="-1"><section><h2>Contacts</h2>''' + contacts + '''</section>
 <section><h2>Agreed meeting points</h2>''' + meetings + '''</section>
 <section><h2>Household and support needs</h2>''' + (household or '<p>Not provided</p>') + '''</section>
 ''' + ('' if omit_notes else '<section><h2>Household notes</h2><p>' + escape(plan.get("notes", "Not provided")) + '</p></section>') + '''
