@@ -178,10 +178,11 @@ h1{line-height:1.25}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-b
 p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left:4px solid #59747a;padding:12px;background:#e7eff1}footer{font-size:.9rem;margin-top:32px}
 .skip-link{position:absolute;left:8px;top:-100px;background:#fff;color:#182b36;padding:8px}.skip-link:focus{top:8px}@media print{.skip-link{display:none}}
 nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}nav a{color:inherit;padding:4px 8px}@media print{nav{display:none}}
+.screen-only a{color:inherit}@media print{.screen-only{display:none}}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid}footer{border-top:1px solid #888}}
 ''' + ''.join(presentation_style) + '''
-</style></head><body><a class="skip-link" href="#plan-content">Skip to plan content</a><header><p>Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>Region: ''' + escape(plan["region"]) + '''
+</style></head><body><a class="skip-link" href="#plan-content">Skip to plan content</a><header id="plan-top"><p>Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>Region: ''' + escape(plan["region"]) + '''
 Household review date: ''' + escape(plan["reviewed_on"]) + '''</p></header>
 <p class="notice">This file may contain private information. View it only on a trusted local device and keep local copies and printouts secure.
 Use the browser Print menu; all content is included in this file.</p>
@@ -191,7 +192,7 @@ Use the browser Print menu; all content is included in this file.</p>
 <section id="household"><h2>Household and support needs</h2>''' + (household or '<p>Not provided</p>') + '''</section>
 ''' + ('' if omit_notes else '<section id="notes"><h2>Household notes</h2><p>' + escape(plan.get("notes", "Not provided")) + '</p></section>') + '''
 <section id="sources"><h2>Sources entered by the author</h2><p>The tool does not fetch or verify sources; dates are supplied by the author. URLs are plain text.</p>''' + (sources or '<p>None supplied; regional requirements are unverified.</p>') + '''</section></main>
-<footer><p>This tool organizes household decisions; it provides no medical advice and does not certify disaster safety. Follow local official instructions.</p>
+<footer><p class="screen-only"><a href="#plan-top">Back to top</a></p><p>This tool organizes household decisions; it provides no medical advice and does not certify disaster safety. Follow local official instructions.</p>
 <p>Open Resilience Lab · Schema version 1 · No scripts, telemetry, or external resources</p></footer>
 </body></html>
 '''
