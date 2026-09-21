@@ -147,7 +147,7 @@ def load_plan(path):
     return validate_plan(plan)
 
 
-def render_plan(plan, *, large_text=False, compact=False, high_contrast=False):
+def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, omit_notes=False):
     validate_plan(plan)
     presentation_style = []
     if high_contrast:
@@ -186,7 +186,7 @@ Use the browser Print menu; all content is included in this file.</p>
 <main><section><h2>Contacts</h2>''' + contacts + '''</section>
 <section><h2>Agreed meeting points</h2>''' + meetings + '''</section>
 <section><h2>Household and support needs</h2>''' + (household or '<p>Not provided</p>') + '''</section>
-<section><h2>Household notes</h2><p>''' + escape(plan.get("notes", "Not provided")) + '''</p></section>
+''' + ('' if omit_notes else '<section><h2>Household notes</h2><p>' + escape(plan.get("notes", "Not provided")) + '</p></section>') + '''
 <section><h2>Sources entered by the author</h2><p>The tool does not fetch or verify sources; dates are supplied by the author. URLs are plain text.</p>''' + (sources or '<p>None supplied; regional requirements are unverified.</p>') + '''</section></main>
 <footer><p>This tool organizes household decisions; it provides no medical advice and does not certify disaster safety. Follow local official instructions.</p>
 <p>Open Resilience Lab · Schema version 1 · No scripts, telemetry, or external resources</p></footer>
@@ -302,6 +302,7 @@ def main(argv=None):
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
         parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")
         parser.add_argument("--summary", action="store_true", help="print aggregate counts after success, without plan text or paths")
+        parser.add_argument("--omit-notes", action="store_true", help="exclude household notes from generated HTML")
         parser.add_argument("--high-contrast", action="store_true", help="use black text and borders on white")
         parser.add_argument("--compact", action="store_true", help="reduce card and section spacing")
         parser.add_argument("--large-text", action="store_true", help="use larger screen and print text")
@@ -315,7 +316,7 @@ def main(argv=None):
             return 0
         if args.check and (args.output is not None or args.force):
             raise PlanError("The --check option cannot be combined with --output or --force.")
-        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast}
+        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast, "omit_notes": args.omit_notes}
         if args.check and any(presentation.values()):
             raise PlanError("HTML presentation options cannot be combined with --check.")
         plan = load_plan(args.input)

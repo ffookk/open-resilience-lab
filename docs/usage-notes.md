@@ -23,3 +23,4 @@
 - `--large-text` increases screen and print text sizes. Presentation flags apply only to generated HTML and cannot be combined with `--check`.
 - `--compact` reduces card and section spacing without removing plan content; preview pagination for the chosen settings.
 - `--high-contrast` uses black text and borders on white without loading fonts, images, or other external resources.
+- `--omit-notes` leaves the notes section and its content out of the HTML. It does not edit the JSON or remove information repeated in other fields.
