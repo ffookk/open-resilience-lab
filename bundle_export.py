@@ -78,6 +78,7 @@ def render_cards(plan, options):
 *{box-sizing:border-box}body{margin:20px;color:#182b36;background:#fff;font:14px/1.4 system-ui,sans-serif;max-width:1000px}
 h1{font-size:1.5em}h2{font-size:1.15em;margin:4px 0}p{white-space:pre-wrap;margin:6px 0}p,h1,h2,footer{overflow-wrap:anywhere}
 main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}article{border:1px dashed #59747a;padding:12px;break-inside:avoid;min-width:0}
+article h2,article footer{white-space:pre-wrap}
 .kind{font-weight:bold;text-transform:uppercase;font-size:.85em}footer{border-top:1px solid #bbb;margin-top:10px;padding-top:6px;font-size:.8em}
 @media(max-width:600px){main{grid-template-columns:1fr}body{margin:12px}}
 @media print{@page{margin:10mm}body{margin:0;max-width:none;font-size:10pt}header{font-size:9pt}main{gap:5mm}article{padding:4mm}h2{break-after:avoid}p{orphans:2;widows:2}}

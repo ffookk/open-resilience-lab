@@ -86,9 +86,21 @@ def check_private_destination(destination, root_name, suffix=None):
         require_absent(parent, leaf)
 
 
+
+def remove_created_file(parent, name, identity):
+    """Best-effort cleanup without removing a different entry at the same name."""
+    try:
+        current = os.stat(name, dir_fd=parent, follow_symlinks=False)
+        if (current.st_dev, current.st_ino) == identity:
+            os.unlink(name, dir_fd=parent)
+    except OSError:
+        pass
+
 def write_private_bytes(parent, name, payload, *, on_create=None):
     """Create and completely write a fixed private file under a held directory."""
     descriptor = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=parent)
+    metadata = os.fstat(descriptor)
+    identity = (metadata.st_dev, metadata.st_ino)
     try:
         with os.fdopen(descriptor, "wb") as stream:
             if on_create is not None:
@@ -97,25 +109,25 @@ def write_private_bytes(parent, name, payload, *, on_create=None):
             stream.flush()
             os.fsync(stream.fileno())
     except BaseException:
-        os.unlink(name, dir_fd=parent)
+        remove_created_file(parent, name, identity)
         raise
+    return identity
 
 
 def publish_private_bytes(parent, name, payload, *, on_create=None):
     """Publish a complete file with an exclusive hard link, never replacing a file."""
     temporary = ".pending-" + secrets.token_hex(16)
-    created = False
+    identity = None
     try:
         def remember(temporary_name, metadata):
             if on_create is not None:
                 on_create(temporary_name, metadata)
                 on_create(name, metadata)
-        write_private_bytes(parent, temporary, payload, on_create=remember)
-        created = True
+        identity = write_private_bytes(parent, temporary, payload, on_create=remember)
         os.link(temporary, name, src_dir_fd=parent, dst_dir_fd=parent, follow_symlinks=False)
     finally:
-        if created:
-            os.unlink(temporary, dir_fd=parent)
+        if identity is not None:
+            remove_created_file(parent, temporary, identity)
 
 
 def save_private_json(document, destination):
