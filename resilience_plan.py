@@ -277,6 +277,7 @@ def main(argv=None):
         epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else
                 "Start a new draft: python3 resilience_plan.py init (alias: template). Use init --help for details."))
     parser.add_argument("--schema-version", action="version", version="Schema version 1", help="print the supported input schema and exit")
+    parser.add_argument("--quiet", action="store_true", help="suppress routine success messages; errors remain visible")
     if initializing:
         parser.add_argument("--output", default=TEMPLATE_PATH, help="JSON destination within private-input (default: private-input/household.json)")
         parser.add_argument("--force", action="store_true", help="replace only an unchanged template; filled plans and unrelated files remain protected")
@@ -289,21 +290,24 @@ def main(argv=None):
         args = parser.parse_args(arguments[1:] if initializing else arguments)
         if initializing:
             save_template(args.output, args.force)
-            print("Template saved locally. Replace every placeholder and enter reviewed_on only after household review. "
-                  "The YYYY-MM-DD placeholder intentionally fails date validation. Keep the template private.")
+            if not args.quiet:
+                print("Template saved locally. Replace every placeholder and enter reviewed_on only after household review. "
+                      "The YYYY-MM-DD placeholder intentionally fails date validation. Keep the template private.")
             return 0
         if args.check and (args.output is not None or args.force):
             raise PlanError("The --check option cannot be combined with --output or --force.")
         plan = load_plan(args.input)
         if args.check:
-            print("Plan input passed format validation. No HTML was rendered or saved.")
+            if not args.quiet:
+                print("Plan input passed format validation. No HTML was rendered or saved.")
             return 0
         output = "private-output/emergency-plan.html" if args.output is None else args.output
         save_plan(render_plan(plan), output, args.input, args.force)
     except PlanError as exc:
         print("Error: " + str(exc), file=sys.stderr)
         return 2
-    print("Plan saved locally. Keep the input, HTML, and printouts private.")
+    if not args.quiet:
+        print("Plan saved locally. Keep the input, HTML, and printouts private.")
     return 0
 
 
