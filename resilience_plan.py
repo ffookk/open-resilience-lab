@@ -187,6 +187,7 @@ section:target{outline:2px solid currentColor;outline-offset:6px}section{scroll-
 @media (forced-colors:active){body,article,.notice,.skip-link{color:CanvasText;background:Canvas}article,.notice,h2{border-color:CanvasText}a{color:LinkText}}
 @media print{p{orphans:3;widows:3}}
 .source-list article p{font-family:ui-monospace,monospace;overflow-wrap:anywhere;font-size:.95em}
+@media screen and (min-width:1000px){#contacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}#contacts>h2{grid-column:1/-1}#contacts>article{margin:0}}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid;page-break-after:avoid}article p{break-before:avoid-page}footer{border-top:1px solid #888}}
 ''' + ''.join(presentation_style) + '''
