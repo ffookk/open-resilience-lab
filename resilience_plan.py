@@ -147,8 +147,11 @@ def load_plan(path):
     return validate_plan(plan)
 
 
-def render_plan(plan):
+def render_plan(plan, *, large_text=False):
     validate_plan(plan)
+    presentation_style = []
+    if large_text:
+        presentation_style.append('body{font-size:20px}@media print{body{font-size:14pt}}')
     escape = lambda value: html.escape(value, quote=True)
     cards = lambda entries: "".join(
         '<article><h3>' + escape(title) + '</h3><p>' + escape(body) + '</p></article>'
@@ -171,6 +174,7 @@ h1{line-height:1.25}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-b
 p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left:4px solid #59747a;padding:12px;background:#e7eff1}footer{font-size:.9rem;margin-top:32px}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid}footer{border-top:1px solid #888}}
+''' + ''.join(presentation_style) + '''
 </style></head><body><header><p>Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>Region: ''' + escape(plan["region"]) + '''
 Household review date: ''' + escape(plan["reviewed_on"]) + '''</p></header>
 <p class="notice">This file may contain private information. View it only on a trusted local device and keep local copies and printouts secure.
@@ -294,6 +298,7 @@ def main(argv=None):
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
         parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")
         parser.add_argument("--summary", action="store_true", help="print aggregate counts after success, without plan text or paths")
+        parser.add_argument("--large-text", action="store_true", help="use larger screen and print text")
     try:
         args = parser.parse_args(arguments[1:] if initializing else arguments)
         if initializing:
@@ -304,6 +309,9 @@ def main(argv=None):
             return 0
         if args.check and (args.output is not None or args.force):
             raise PlanError("The --check option cannot be combined with --output or --force.")
+        presentation = {"large_text": args.large_text}
+        if args.check and any(presentation.values()):
+            raise PlanError("HTML presentation options cannot be combined with --check.")
         plan = load_plan(args.input)
         if args.check:
             if not args.quiet:
@@ -312,7 +320,7 @@ def main(argv=None):
                 _print_summary(plan)
             return 0
         output = "private-output/emergency-plan.html" if args.output is None else args.output
-        save_plan(render_plan(plan), output, args.input, args.force)
+        save_plan(render_plan(plan, **presentation), output, args.input, args.force)
     except PlanError as exc:
         print("Error: " + str(exc), file=sys.stderr)
         return 2

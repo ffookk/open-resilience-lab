@@ -159,6 +159,13 @@ class PlanTests(unittest.TestCase):
             self.assertEqual(app.main([str(EXAMPLE), "--check", "--summary"]), 2)
         self.assertEqual(output.getvalue(), "")
 
+    def test_large_text_generation_is_optional_and_rejected_for_check(self):
+        self.assertNotIn("font-size:20px", app.render_plan(self.plan))
+        self.assertIn("font-size:20px", app.render_plan(self.plan, large_text=True))
+        with contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(app.main([str(EXAMPLE), "--check", "--large-text"]), 2)
+        self.assertIn("HTML presentation options", errors.getvalue())
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
