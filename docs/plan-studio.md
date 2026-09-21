@@ -82,3 +82,5 @@ Long-text fields offer **Expand text editor** and **Shrink text editor** to swit
 **Inspect draft JSON** reveals a read-only view of all current fields, including incomplete values and optional-field presence. The inspector updates with edits, is unaffected by the preview section filter, and does not save or validate a file.
 
 Each editor section has **Hide fields** and **Show fields** controls. Collapsing retains data and validation; issue navigation automatically opens its target section. Import and reset reopen Plan details when focusing the title. Section visibility lasts only in the current tab.
+
+The section navigation includes **Review and save**, which moves both the view and keyboard focus to validation and download controls without changing the draft.
