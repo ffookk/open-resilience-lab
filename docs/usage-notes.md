@@ -21,3 +21,4 @@
 - Add `--quiet` to generation, `--check`, or `init` / `template` to suppress routine success messages; errors and exit codes remain available.
 - `--summary` prints JSON counts for contacts, meeting points, household members, and sources only after successful generation or checking. It remains visible with `--quiet` and contains no plan text or paths.
 - `--large-text` increases screen and print text sizes. Presentation flags apply only to generated HTML and cannot be combined with `--check`.
+- `--compact` reduces card and section spacing without removing plan content; preview pagination for the chosen settings.
