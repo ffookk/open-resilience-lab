@@ -24,3 +24,4 @@
 - `--compact` reduces card and section spacing without removing plan content; preview pagination for the chosen settings.
 - `--high-contrast` uses black text and borders on white without loading fonts, images, or other external resources.
 - `--omit-notes` leaves the notes section and its content out of the HTML. It does not edit the JSON or remove information repeated in other fields.
+- `--landscape` requests landscape print orientation. Browser print settings and the selected printer may override CSS preferences.
