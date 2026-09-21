@@ -173,6 +173,11 @@
       if (include) target[path.at(-1)] = clone(initial); else delete target[path.at(-1)]; this.changed();
     }
     add(key) {if (!Array.isArray(this.plan[key]) || this.plan[key].length >= (key === "meeting_points" ? 10 : 20)) return false; this.plan[key].push(blankItem(key)); this.changed(); return true;}
+    duplicate(key, index) {
+      const values = this.plan[key], maximum = key === "meeting_points" ? 10 : 20;
+      if (!Array.isArray(values) || !Number.isInteger(index) || index < 0 || index >= values.length || values.length >= maximum) return false;
+      values.splice(index + 1, 0, clone(values[index])); this.changed(); return true;
+    }
     remove(key, index) {this.plan[key].splice(index, 1); this.changed();}
     move(key, index, delta) {const values = this.plan[key], next = index + delta; if (next < 0 || next >= values.length) return false; [values[index], values[next]] = [values[next], values[index]]; this.changed(); return true;}
     import(source) {const next = importJSON(source); this.plan = next; this.baseline = JSON.stringify(next); this.changed();}
