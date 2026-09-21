@@ -5,6 +5,7 @@
   const byId = id => document.getElementById(id);
   const form = byId("plan-form"), preview = byId("preview-content"), status = byId("draft-status");
   let showErrors = false, importSequence = 0;
+  const collapsedSections = new Set();
   const labels = {title:"Plan title", region:"Applicable region", reviewed_on:"Household review date (user supplied)",
     contacts:"Contacts", meeting_points:"Meeting arrangements", household:"Household members", sources:"Sources", notes:"Household notes",
     name:"Name", role:"Agreed role", contact:"Contact details", label:"Arrangement label", instructions:"Agreed instructions",
@@ -43,6 +44,14 @@
     const item = node("section", undefined, "editor-section"); item.id = "section-" + key;
     item.setAttribute("aria-labelledby", "heading-" + key);
     const title = node("h2", heading); title.id = "heading-" + key;
+    const disclosure = button("", () => {
+      if (collapsedSections.has(key)) collapsedSections.delete(key); else collapsedSections.add(key); updateDisclosure();
+    }); disclosure.dataset.sectionToggle = key;
+    const updateDisclosure = () => {
+      const closed = collapsedSections.has(key); item.classList.toggle("collapsed", closed);
+      disclosure.textContent = closed ? "Show fields" : "Hide fields"; disclosure.setAttribute("aria-expanded", String(!closed));
+      disclosure.setAttribute("aria-label", (closed ? "Show " : "Hide ") + heading + " fields");
+    }; updateDisclosure(); title.append(disclosure);
     item.append(title, node("p", description, "hint")); form.append(item); return item;
   }
   function list(key, fields, minimum, maximum) {
@@ -107,6 +116,8 @@
   }
   function focusPath(path) {
     const input = byId(pathId(path));
+    const section = input ? input.closest(".editor-section") : byId("section-" + path[0]);
+    if (section && section.classList.contains("collapsed")) section.querySelector("[data-section-toggle]").click();
     if (input) input.focus();
     else {const target = byId("section-" + path[0]) || form; target.tabIndex = -1; target.focus();}
   }
@@ -157,7 +168,7 @@
   });
   byId("reset").addEventListener("click", () => {
     if (!window.confirm("Discard the current draft and start a blank plan? No backup is saved automatically.")) return;
-    importSequence++; draft.reset(); showErrors = false; byId("import-json").value = ""; renderForm(); changed(); message("Blank draft started. No date or review status has been assumed."); byId("field-title").focus();
+    importSequence++; draft.reset(); showErrors = false; byId("import-json").value = ""; renderForm(); changed(); message("Blank draft started. No date or review status has been assumed."); focusPath(["title"]);
   });
   byId("import-json").addEventListener("change", async event => {
     const file = event.target.files[0]; if (!file) return;
@@ -170,7 +181,7 @@
       const imported = api.importBytes(raw);
       const source = api.exportJSON(imported);
       if (draft.dirty && !window.confirm("Replace unsaved edits with this validated JSON file? No backup is saved automatically.")) {message("Import cancelled. The current draft was kept."); return;}
-      draft.import(source); showErrors = false; renderForm(); changed(); message("JSON imported locally. All fields and optional-field presence were preserved; facts remain unverified."); byId("field-title").focus();
+      draft.import(source); showErrors = false; renderForm(); changed(); message("JSON imported locally. All fields and optional-field presence were preserved; facts remain unverified."); focusPath(["title"]);
     } catch (_) {message("Import failed. Use a valid UTF-8 schema-version-1 JSON file up to 256 KiB without duplicate keys. The current draft was kept.");}
     finally {if (sequence === importSequence) event.target.value = "";}
   });

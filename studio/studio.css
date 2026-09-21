@@ -12,3 +12,5 @@
 #preview-content.compact .preview-card{padding:.4rem;margin:.25rem 0}#preview-content.compact .preview-card p{margin:.25rem 0}
 
 #preview-content.large-text{font-size:1.25rem}#preview-content.large-text :is(h3,h4,h5){font-size:1.1em}
+
+.editor-section h2{display:flex;gap:.6rem;align-items:center;justify-content:space-between}.editor-section h2 button{font-size:.8rem}.editor-section.collapsed>:not(h2){display:none}
