@@ -3,3 +3,5 @@
 @media(max-width:950px){.layout{grid-template-columns:1fr}.preview-panel{position:static;max-height:none}.shell{padding:1rem}}
 @media(max-width:480px){header{padding:1.5rem 1rem}.editor-section,.validation-panel,.preview-panel{padding:1rem}.entry{padding:.75rem}.downloads button{width:100%}.toolbar input{width:100%}}
 @media print{header,.toolbar,nav,#editor-column,.privacy,footer,.preview-panel>h2,.preview-panel>p{display:none}.layout{display:block}.preview-panel{border:0;position:static;max-height:none;overflow:visible}.preview-panel:before{content:"DRAFT PREVIEW - use validated HTML exports for printing";font-weight:bold}.shell{padding:0}.preview-card{break-inside:avoid}}
+
+.layout.preview-hidden{grid-template-columns:1fr}
