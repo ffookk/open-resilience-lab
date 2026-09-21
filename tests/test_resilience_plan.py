@@ -191,6 +191,12 @@ class PlanTests(unittest.TestCase):
             self.assertIn('id="' + target + '"', document)
         self.assertNotIn('href="#notes"', app.render_plan(self.plan, omit_notes=True))
 
+    def test_entered_card_text_has_automatic_direction_and_stays_escaped(self):
+        self.plan["contacts"][0]["name"] = "<em>Sample</em>"
+        document = app.render_plan(self.plan)
+        self.assertIn('<h3 dir="auto">&lt;em&gt;Sample&lt;/em&gt;', document)
+        self.assertNotIn("<em>Sample</em>", document)
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
