@@ -180,6 +180,7 @@ p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left
 nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}nav a{color:inherit;padding:10px 12px;min-height:44px;display:inline-flex;align-items:center}@media print{nav{display:none}}
 .screen-only a{color:inherit}@media print{.screen-only{display:none}}
 :focus-visible{outline:3px solid currentColor;outline-offset:4px}
+section:target{outline:2px solid currentColor;outline-offset:6px}section{scroll-margin-top:16px}
 @media(max-width:600px){body{padding:16px}h1{font-size:1.7rem}}
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid}footer{border-top:1px solid #888}}
 ''' + ''.join(presentation_style) + '''
