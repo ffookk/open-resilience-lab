@@ -304,6 +304,7 @@ def main(argv=None):
     arguments = list(sys.argv[1:] if argv is None else argv)
     initializing = bool(arguments) and arguments[0] in ("init", "template")
     parser = PrivateArgumentParser(
+        allow_abbrev=False,
         description=("Create a private editable JSON draft. Review it before generating a plan." if initializing else
                      "Generate an offline plan locally. Input and HTML contain private data; never commit real plans."),
         epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else

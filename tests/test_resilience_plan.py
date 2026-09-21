@@ -232,6 +232,12 @@ class PlanTests(unittest.TestCase):
             self.assertEqual(app.main([str(EXAMPLE), "--font", "PRIVATE_VALUE"]), 2)
         self.assertNotIn("PRIVATE_VALUE", errors.getvalue())
 
+    def test_incomplete_option_names_fail_without_echoing_values(self):
+        with contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(app.main([str(EXAMPLE), "--out", "PRIVATE_VALUE"]), 2)
+        self.assertNotIn("PRIVATE_VALUE", errors.getvalue())
+        self.assertIn("Invalid command arguments", errors.getvalue())
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
