@@ -7,8 +7,8 @@ Swiss security policy strategy provides the first research leads. Independent co
 
 ## Current status
 
-A Python CLI prototype with no third-party dependencies creates a reviewed local plan through a guided terminal wizard, creates editable JSON drafts, generates self-contained HTML household plans, and exports private offline bundles with printable cards and an integrity check.
-The tool makes no network requests and runs no telemetry. Generated pages contain no scripts or external resources; source URLs appear only as text.
+A Python CLI prototype with no third-party dependencies creates a blank offline graphical plan studio, creates a reviewed local plan through a guided terminal wizard, creates editable JSON drafts, generates self-contained HTML household plans, and exports private offline bundles with printable cards and an integrity check.
+The tool makes no network requests and runs no telemetry. Printable plan pages contain no scripts or external resources. The optional studio uses fixed local JavaScript for editing; it has no network requests, browser storage, or external assets. Source URLs appear only as text.
 Input validation, HTML escaping, overwrite protection, file permissions, and generation with Python sockets disabled have been checked.
 The earlier bilingual version of the fictional example passed an offline desktop/narrow-viewport check in one Chrome engine and a two-page A4 PDF check; see the [browser check record](docs/browser-check.md). The current English presentation has also passed an offline desktop/narrow-screen layout check in the same Chrome version; its PDF pagination has not been rechecked.
 Cross-browser use, physical mobile devices, screen readers, physical printing, and real household trials remain unverified. Regional policy requirements have not been verified either.
@@ -37,6 +37,16 @@ python3 resilience_plan.py examples/fictional-household.json --check
 This mode uses the same input-format validation and prints a fixed result without input values or paths. It creates no output files or directories and returns `0` on success or `2` on failure.
 `--check` cannot be combined with an explicit `--output` or `--force`, and is not accepted by `init` or `template`.
 Passing format validation does not verify household arrangements, source facts, or emergency safety.
+
+To edit a plan through a graphical form, generate the [offline household plan studio](docs/plan-studio.md):
+
+```sh
+python3 resilience_plan.py studio --output private-output/plan-studio.html
+```
+
+Open the resulting file locally in a modern browser. It starts blank with no household data, review date, or implied readiness. Add, remove, and reorder contacts, meeting arrangements, household entries, and sources; preview the draft; import a local schema-version-1 JSON file; and explicitly download validated JSON, printable full-plan HTML, or contact/meeting cards. Every field remains editable locally, including optional notes and support needs.
+
+The studio keeps edits only in its tab. It has no autosave or browser storage. Check that a JSON download has actually been saved before selecting **I saved the JSON**; printable exports do not save editable JSON. Closing or refreshing can lose work, and a browser warning is not guaranteed. Input, downloads, previews, and printouts may contain private information. Browser download destinations and permissions are controlled by the browser, not the Python generator.
 
 To create a complete plan interactively without editing JSON, use the [guided local wizard](docs/guided-plan.md):
 
@@ -69,7 +79,7 @@ Enter the review date only after reviewing the plan. To try generation and print
 The tool does not detect or verify the other placeholders. The person completing the draft must replace and check each one; passing format validation does not establish that the content has been reviewed.
 
 `template` is an alias for `init`; `python3 resilience_plan.py init --help` displays template command help.
-For JSON input files named `wizard`, `bundle`, or `verify-bundle`, prefix the filename with `./`. For files named `init` or `template`, use
+For JSON input files named `studio`, `wizard`, `bundle`, or `verify-bundle`, prefix the filename with `./`. For files named `init` or `template`, use
 `python3 resilience_plan.py ./init` or `python3 resilience_plan.py ./template` to read it as an input file.
 Use `--output private-input/another-plan.json` to create another draft. The destination must be under
 `private-input/` in the current directory and have a `.json` extension; neither the destination nor its directories may be symbolic links.
@@ -117,6 +127,7 @@ Functional tests cover malicious HTML escaping, required fields and type/length 
 overwrite and link protection, POSIX permissions, absence of external resource markup, and template creation and CLI generation with Python sockets disabled.
 Template tests also cover the unreviewed date placeholder, generation through the original CLI after editing, overwrite restrictions, parent-directory links, directory boundaries, and argument errors that do not echo supplied values.
 Wizard tests cover hidden-input refusal, validated retries, cancellation, safe saving, and no-clobber behavior. Bundle tests cover complete exports, escaping, bounded integrity checks, malformed or linked files, private permissions, and cleanup after handled failures or interruptions.
+Studio parity and state checks run through Node when it is available on `PATH`; unittest explicitly skips those checks when Node is absent. A skipped test is not JavaScript parity evidence. Normal studio generation and use need only Python and a browser, without Node or package installation.
 These checks do not establish the privacy or reliability of browser extensions, operating systems, cloud synchronization, printers, or real disaster use.
 Before contributing, also follow the repository checks in the [privacy guide](docs/privacy.md).
 
@@ -131,7 +142,8 @@ Implemented workflow and remaining goals:
 - Implemented: save JSON, edit it, and generate again; output can include sources and review dates supplied by the person completing the plan.
 - Implemented: `init` / `template` creates an unreviewed draft in `private-input/` without modifying the repository example and preserves the original input-file CLI usage.
 - Implemented: guided terminal creation with hidden validated prompts, and private bundles containing full HTML, portable text, contact/meeting cards, and a bounded integrity verifier.
-- Planned: a graphical editor, importing plan HTML, regional official-source verification, and real usage feedback.
+- Implemented: a blank offline graphical studio with all schema-v1 fields, local JSON round trips, validation, reorderable lists, a live preview, and explicit JSON/printable downloads.
+- Planned: importing plan HTML, regional official-source verification, and real usage feedback.
 
 The current format is JSON schema version 1, implemented with Python's standard library. Initial regional sources have not yet been selected or verified.
 Use fictional data in public repositories and feedback; do not publish real contact details, addresses, or health information.
@@ -142,7 +154,7 @@ Use fictional data in public repositories and feedback; do not publish real cont
 |---|---|---|
 | P0 | Local editing, previewing, and printing | Runnable version, fictional example, instructions, and a print completeness check |
 | P1 | Offline use and personal data protection | Offline execution record and checks that entered content was not sent to external servers |
-| P1 | Export and reimport | Key fields preserved after reimport and clear handling of invalid files |
+| P1 | Export and reimport | JSON field preservation and invalid-input handling are implemented; arbitrary HTML reimport remains planned |
 | P1 | Mobile use, keyboard operation, and English presentation | Check records for the target devices and input methods |
 | P2 | Official-source maintenance | Source, version, review date, and applicable region recorded for every verified resource |
 
