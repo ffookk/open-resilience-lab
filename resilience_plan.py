@@ -9,8 +9,11 @@ import json
 import os
 from pathlib import Path
 import sys
+import stat
 import tempfile
 from urllib.parse import urlsplit
+
+from private_storage import remove_created_file
 
 MAX_INPUT_BYTES = 256 * 1024
 TEMPLATE_PATH = "private-input/household.json"
@@ -135,8 +138,13 @@ def _unique_object(pairs):
 
 def load_plan(path):
     try:
-        with Path(path).open("rb") as stream:
+        descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
+        with os.fdopen(descriptor, "rb") as stream:
+            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                raise PlanError("Input must be a regular JSON file.")
             payload = stream.read(MAX_INPUT_BYTES + 1)
+    except PlanError:
+        raise
     except (OSError, ValueError):
         raise PlanError("Unable to read the input file.") from None
     if len(payload) > MAX_INPUT_BYTES:
@@ -182,7 +190,7 @@ def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, o
 <title>''' + ("Household offline plan" if neutral_title else escape(plan["title"])) + '''</title>
 <style>
 *{box-sizing:border-box}body{font-family:system-ui,sans-serif;max-width:900px;margin:0 auto;padding:32px;color:#182b36;background:#f5f7f8;line-height:1.6}
-h1{line-height:1.25;overflow-wrap:anywhere}h2,h3{overflow-wrap:anywhere}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-bottom:5px}h3{margin:0 0 6px}article{background:white;border:1px solid #cbd5d9;border-radius:8px;padding:16px;margin:12px 0;break-inside:avoid}
+h1,h3{white-space:pre-wrap}h1{line-height:1.25;overflow-wrap:anywhere}h2,h3{overflow-wrap:anywhere}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-bottom:5px}h3{margin:0 0 6px}article{background:white;border:1px solid #cbd5d9;border-radius:8px;padding:16px;margin:12px 0;break-inside:avoid}
 p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left:4px solid #59747a;padding:12px;background:#e7eff1}footer{font-size:.9rem;margin-top:32px}
 .skip-link{position:absolute;left:8px;top:-100px;background:#fff;color:#182b36;padding:8px}.skip-link:focus{top:8px}@media print{.skip-link{display:none}}
 nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}nav a{color:inherit;padding:10px 12px;min-height:44px;display:inline-flex;align-items:center}@media print{nav{display:none}}
@@ -230,23 +238,33 @@ def _save_private_file(document, output_path, protected_paths=(), force=False, r
                 existing = stream.read(MAX_INPUT_BYTES + 1)
             if existing != document.encode("utf-8"):
                 raise PlanError("Only an unchanged template can be replaced. Choose a new template file.")
-        output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        missing = []
+        parent = output.parent
+        while not parent.exists():
+            missing.append(parent)
+            parent = parent.parent
+        for parent in reversed(missing):
+            parent.mkdir(mode=0o700, exist_ok=True)
         if not force:
             fd = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            metadata = os.fstat(fd)
+            identity = (metadata.st_dev, metadata.st_ino)
             try:
                 with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
                     stream.write(document)
             except BaseException:
-                output.unlink(missing_ok=True)
+                remove_created_file(None, output, identity)
                 raise
         else:
             fd, temporary = tempfile.mkstemp(prefix=".plan-", dir=output.parent)
+            metadata = os.fstat(fd)
+            identity = (metadata.st_dev, metadata.st_ino)
             try:
                 with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
                     stream.write(document)
                 os.replace(temporary, output)
             finally:
-                Path(temporary).unlink(missing_ok=True)
+                remove_created_file(None, temporary, identity)
     except FileExistsError:
         raise PlanError("Output already exists. Choose a new file or explicitly use --force.") from None
     except PlanError:
