@@ -281,8 +281,9 @@ def main(argv=None):
         parser.add_argument("--force", action="store_true", help="replace only an unchanged template; filled plans and unrelated files remain protected")
     else:
         parser.add_argument("input", help="local UTF-8 JSON plan (prefix ./ for a file named init or template)")
-        parser.add_argument("--output", default="private-output/emergency-plan.html", help="local HTML destination (default: private-output/emergency-plan.html)")
+        parser.add_argument("--output", help="local HTML destination (default: private-output/emergency-plan.html)")
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
+        parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")
     try:
         args = parser.parse_args(arguments[1:] if initializing else arguments)
         if initializing:
@@ -290,8 +291,14 @@ def main(argv=None):
             print("Template saved locally. Replace every placeholder and enter reviewed_on only after household review. "
                   "The YYYY-MM-DD placeholder intentionally fails date validation. Keep the template private.")
             return 0
+        if args.check and (args.output is not None or args.force):
+            raise PlanError("The --check option cannot be combined with --output or --force.")
         plan = load_plan(args.input)
-        save_plan(render_plan(plan), args.output, args.input, args.force)
+        if args.check:
+            print("Plan input passed format validation. No HTML was rendered or saved.")
+            return 0
+        output = "private-output/emergency-plan.html" if args.output is None else args.output
+        save_plan(render_plan(plan), output, args.input, args.force)
     except PlanError as exc:
         print("Error: " + str(exc), file=sys.stderr)
         return 2

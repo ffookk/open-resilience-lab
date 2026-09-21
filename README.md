@@ -28,6 +28,16 @@ The output includes print styles, but pagination should still be previewed for e
 The program does not open a browser or echo household details or input paths in the terminal.
 A successful command returns exit code `0`; input, argument, or save failures return `2`. Scripts should check the exit code before using the output.
 
+To validate an input without rendering or saving HTML, add `--check`:
+
+```sh
+python3 resilience_plan.py examples/fictional-household.json --check
+```
+
+This mode uses the same input-format validation and prints a fixed result without input values or paths. It creates no output files or directories and returns `0` on success or `2` on failure.
+`--check` cannot be combined with an explicit `--output` or `--force`, and is not accepted by `init` or `template`.
+Passing format validation does not verify household arrangements, source facts, or emergency safety.
+
 To prepare a personal plan, run `init` from the repository root to create a draft in the ignored `private-input/` directory:
 
 ```sh
