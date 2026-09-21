@@ -124,6 +124,10 @@
     showErrors = true; changed(); const errors = api.validate(draft.plan);
     if (errors.length) {byId("validation-errors").focus();} else message("Format checks passed. This does not verify household arrangements, source facts, or safety.");
   });
+  byId("first-issue").addEventListener("click", () => {
+    showErrors = true; changed(); const errors = api.validate(draft.plan);
+    if (errors.length) focusPath(errors[0].path); else message("No format issues to focus. Household decisions and source facts remain unverified.");
+  });
   byId("reset").addEventListener("click", () => {
     if (!window.confirm("Discard the current draft and start a blank plan? No backup is saved automatically.")) return;
     importSequence++; draft.reset(); showErrors = false; byId("import-json").value = ""; renderForm(); changed(); message("Blank draft started. No date or review status has been assumed."); byId("field-title").focus();

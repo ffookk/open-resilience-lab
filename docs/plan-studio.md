@@ -60,3 +60,7 @@ The Python tests check blank generation, exact Content Security Policy hashes, n
 The stable pure JavaScript entrypoint is `require('./studio/core.js')(policy)` in Node and `window.PlanStudio` in the generated browser page. Obtain the fixed configuration with Python's `plan_studio.studio_policy()`. The API exposes `parseJSON`, `validate`, `importJSON`, `importBytes`, `exportJSON`, `exportHTML`, `blank`, and `Draft`. Use `importJSON` or `importBytes` for external documents: JavaScript numbers alone cannot retain the distinction between JSON `1` and `1.0`, which the strict parser checks before validation. Validation error paths and messages contain fixed field names and list ordinals, not entered values.
 
 Parity fixtures compare accepted and rejected inputs with the existing Python validator, including optional fields, Unicode/codepoint limits, calendar dates, ports, credentials, empty URL delimiters, and bracketed hosts. State tests cover list movement, failed imports, reset, export validation, and explicit save confirmation. Inert export checks cover hostile-looking strings, preserved multiline data, offline markup, and exact stylesheet hashes. Use synthetic fixtures only in public tests or reports.
+
+## Small editing conveniences
+
+**Go to first issue** shows validation feedback and focuses the first affected field or section. It changes no plan data.
