@@ -66,3 +66,5 @@ Parity fixtures compare accepted and rejected inputs with the existing Python va
 **Go to first issue** shows validation feedback and focuses the first affected field or section. It changes no plan data.
 
 **Hide live preview** hides the preview panel and expands the editor into its space. **Show live preview** restores the current draft view. This view choice does not hide editor fields or change exports.
+
+**Preview section** focuses the live preview on one section while keeping plan details visible. Choose **All sections** to restore the complete view. JSON and HTML downloads always retain their existing full contents.

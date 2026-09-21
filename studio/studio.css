@@ -5,3 +5,6 @@
 @media print{header,.toolbar,nav,#editor-column,.privacy,footer,.preview-panel>h2,.preview-panel>p{display:none}.layout{display:block}.preview-panel{border:0;position:static;max-height:none;overflow:visible}.preview-panel:before{content:"DRAFT PREVIEW - use validated HTML exports for printing";font-weight:bold}.shell{padding:0}.preview-card{break-inside:avoid}}
 
 .layout.preview-hidden{grid-template-columns:1fr}
+
+#preview-section{font:inherit;max-width:100%;min-height:44px}
+@media print{#preview-panel>:not(#preview-content){display:none}}
