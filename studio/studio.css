@@ -8,3 +8,5 @@
 
 #preview-section{font:inherit;max-width:100%;min-height:44px}
 @media print{#preview-panel>:not(#preview-content){display:none}}
+
+#preview-content.compact .preview-card{padding:.4rem;margin:.25rem 0}#preview-content.compact .preview-card p{margin:.25rem 0}

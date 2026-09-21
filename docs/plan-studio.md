@@ -68,3 +68,5 @@ Parity fixtures compare accepted and rejected inputs with the existing Python va
 **Hide live preview** hides the preview panel and expands the editor into its space. **Show live preview** restores the current draft view. This view choice does not hide editor fields or change exports.
 
 **Preview section** focuses the live preview on one section while keeping plan details visible. Choose **All sections** to restore the complete view. JSON and HTML downloads always retain their existing full contents.
+
+**Compact preview cards** reduces spacing within the live preview without hiding or truncating any content. It affects neither the editor nor downloaded layouts.
