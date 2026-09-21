@@ -182,7 +182,7 @@ class PlanTests(unittest.TestCase):
     def test_skip_link_targets_the_focusable_main_landmark(self):
         document = app.render_plan(self.plan)
         self.assertIn('href="#plan-content"', document)
-        self.assertIn('<main id="plan-content" tabindex="-1">', document)
+        self.assertIn('<main id="plan-content" tabindex="-1" aria-labelledby="plan-title">', document)
 
     def test_section_navigation_respects_omitted_notes(self):
         document = app.render_plan(self.plan)
