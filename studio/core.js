@@ -180,6 +180,11 @@
     }
     remove(key, index) {this.plan[key].splice(index, 1); this.changed();}
     move(key, index, delta) {const values = this.plan[key], next = index + delta; if (next < 0 || next >= values.length) return false; [values[index], values[next]] = [values[next], values[index]]; this.changed(); return true;}
+    moveTo(key, index, destination) {
+      const values = this.plan[key];
+      if (!Array.isArray(values) || !Number.isInteger(index) || !Number.isInteger(destination) || index < 0 || index >= values.length || destination < 0 || destination >= values.length || index === destination) return false;
+      values.splice(destination, 0, values.splice(index, 1)[0]); this.changed(); return true;
+    }
     import(source) {const next = importJSON(source); this.plan = next; this.baseline = JSON.stringify(next); this.changed();}
     reset() {this.plan = blank(); this.baseline = JSON.stringify(this.plan); this.changed();}
     requestJSON() {const output = exportJSON(this.plan); this.pending = JSON.stringify(this.plan); return output;}
