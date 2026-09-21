@@ -203,6 +203,14 @@ class PlanTests(unittest.TestCase):
         self.assertIn("<title>Household offline plan</title>", document)
         self.assertIn('id="plan-title">PRIVATE_TITLE_MARKER</h1>', document)
 
+    def test_omit_household_removes_member_details_and_navigation(self):
+        self.plan["household"][0]["name"] = "PRIVATE_MEMBER_MARKER"
+        document = app.render_plan(self.plan, omit_household=True)
+        self.assertNotIn("PRIVATE_MEMBER_MARKER", document)
+        self.assertNotIn('href="#household"', document)
+        self.assertNotIn('id="household"', document)
+        self.assertEqual(self.plan["household"][0]["name"], "PRIVATE_MEMBER_MARKER")
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):

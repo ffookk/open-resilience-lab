@@ -26,3 +26,4 @@
 - `--omit-notes` leaves the notes section and its content out of the HTML. It does not edit the JSON or remove information repeated in other fields.
 - `--landscape` requests landscape print orientation. Browser print settings and the selected printer may override CSS preferences.
 - `--neutral-title` replaces only the browser-tab title with "Household offline plan". The visible heading and other private content remain in the file.
+- `--omit-household` excludes the household/support-needs section and its navigation link. It does not remove member information repeated in contacts, notes, or other fields.

@@ -147,7 +147,7 @@ def load_plan(path):
     return validate_plan(plan)
 
 
-def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, omit_notes=False, landscape=False, neutral_title=False):
+def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, omit_notes=False, landscape=False, neutral_title=False, omit_household=False):
     validate_plan(plan)
     presentation_style = []
     if landscape:
@@ -195,10 +195,10 @@ section:target{outline:2px solid currentColor;outline-offset:6px}section{scroll-
 Household review date: <time datetime="''' + escape(plan["reviewed_on"]) + '''">''' + escape(plan["reviewed_on"]) + '''</time></p></header>
 <p class="notice">This file may contain private information. View it only on a trusted local device and keep local copies and printouts secure.
 Use the browser Print menu; all content is included in this file.</p>
-<nav aria-label="Plan sections"><a href="#contacts">Contacts</a> <a href="#meeting-points">Meeting points</a> <a href="#household">Household</a> ''' + ('' if omit_notes else '<a href="#notes">Notes</a> ') + '''<a href="#sources">Sources</a></nav>
+<nav aria-label="Plan sections"><a href="#contacts">Contacts</a> <a href="#meeting-points">Meeting points</a> ''' + ('' if omit_household else '<a href="#household">Household</a> ') + ('' if omit_notes else '<a href="#notes">Notes</a> ') + '''<a href="#sources">Sources</a></nav>
 <main id="plan-content" tabindex="-1" aria-labelledby="plan-title"><section id="contacts" aria-labelledby="contacts-title"><h2 id="contacts-title">Contacts</h2>''' + contacts + '''</section>
 <section id="meeting-points" aria-labelledby="meetings-title"><h2 id="meetings-title">Agreed meeting points</h2>''' + meetings + '''</section>
-<section id="household"><h2>Household and support needs</h2>''' + (household or '<p>Not provided</p>') + '''</section>
+''' + ('' if omit_household else '<section id="household"><h2>Household and support needs</h2>' + (household or '<p>Not provided</p>') + '</section>') + '''
 ''' + ('' if omit_notes else '<section id="notes"><h2>Household notes</h2><p>' + escape(plan.get("notes", "Not provided")) + '</p></section>') + '''
 <section id="sources" class="source-list"><h2>Sources entered by the author</h2><p>The tool does not fetch or verify sources; dates are supplied by the author. URLs are plain text.</p>''' + (sources or '<p>None supplied; regional requirements are unverified.</p>') + '''</section></main>
 <footer><p class="screen-only"><a href="#plan-top">Back to top</a></p><p>This tool organizes household decisions; it provides no medical advice and does not certify disaster safety. Follow local official instructions.</p>
@@ -315,6 +315,7 @@ def main(argv=None):
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
         parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")
         parser.add_argument("--summary", action="store_true", help="print aggregate counts after success, without plan text or paths")
+        parser.add_argument("--omit-household", action="store_true", help="exclude the household and support-needs section from HTML")
         parser.add_argument("--neutral-title", action="store_true", help="use a fixed browser-tab title while retaining the visible plan heading")
         parser.add_argument("--landscape", action="store_true", help="request landscape print orientation")
         parser.add_argument("--omit-notes", action="store_true", help="exclude household notes from generated HTML")
@@ -331,7 +332,7 @@ def main(argv=None):
             return 0
         if args.check and (args.output is not None or args.force):
             raise PlanError("The --check option cannot be combined with --output or --force.")
-        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast, "omit_notes": args.omit_notes, "landscape": args.landscape, "neutral_title": args.neutral_title}
+        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast, "omit_notes": args.omit_notes, "landscape": args.landscape, "neutral_title": args.neutral_title, "omit_household": args.omit_household}
         if args.check and any(presentation.values()):
             raise PlanError("HTML presentation options cannot be combined with --check.")
         plan = load_plan(args.input)
