@@ -12,6 +12,7 @@
 - Input must be standard JSON; comments and trailing commas are not accepted.
 - Save input as UTF-8 without a BOM; the current reader does not strip a UTF-8 BOM.
 - The generation command reads JSON by content and does not require a `.json` input extension. The template command does require a `.json` output extension.
+- `INPUT --check` reads and validates the input without rendering or saving HTML. Existing files remain unchanged, no output directories are created, and explicit `--output` or `--force` options are rejected.
 - Template destination paths must not contain `..`, even if the resolved path would remain inside `private-input/`.
 - `contacts[].contact` is plain text. The tool does not validate phone number formats, make calls, send messages, or confirm contact availability.
 - Date validation checks calendar validity and `YYYY-MM-DD` format, but does not reject future dates. Enter the actual review date.

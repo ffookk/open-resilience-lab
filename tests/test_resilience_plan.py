@@ -7,6 +7,7 @@ from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import resilience_plan as app
 
@@ -133,6 +134,93 @@ class PlanTests(unittest.TestCase):
             with patch("socket.socket", side_effect=AssertionError("Network is forbidden")), contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(app.main([str(EXAMPLE), "--output", str(output)]), 0)
             self.assertIn("Fictional household example", output.read_text())
+
+
+class CheckTests(unittest.TestCase):
+    def setUp(self):
+        self.previous_directory = Path.cwd()
+        self.workspace = tempfile.TemporaryDirectory()
+        os.chdir(self.workspace.name)
+        self.addCleanup(self.workspace.cleanup)
+        self.addCleanup(os.chdir, self.previous_directory)
+        self.input = Path("DO_NOT_ECHO_INPUT.json")
+        self.input.write_text(EXAMPLE.read_text(encoding="utf-8"), encoding="utf-8")
+
+    def run_cli(self, arguments, expected):
+        with contextlib.redirect_stdout(io.StringIO()) as output, contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(app.main(arguments), expected)
+        messages = output.getvalue() + errors.getvalue()
+        self.assertNotIn("DO_NOT_ECHO", messages)
+        self.assertNotIn(self.workspace.name, messages)
+        return output.getvalue(), errors.getvalue()
+
+    def assert_only_unchanged_input(self, before):
+        self.assertEqual(list(Path.cwd().iterdir()), [self.input.resolve()])
+        self.assertEqual(self.input.read_bytes(), before)
+
+    def test_check_validates_without_rendering_saving_or_creating_directories(self):
+        before = self.input.read_bytes()
+        with patch.object(app, "render_plan") as render, patch.object(app, "save_plan") as save, \
+                patch("socket.socket", side_effect=AssertionError("Network is forbidden")):
+            output, errors = self.run_cli([str(self.input), "--check"], 0)
+        render.assert_not_called()
+        save.assert_not_called()
+        self.assertEqual(output, "Plan input passed format validation. No HTML was rendered or saved.\n")
+        self.assertEqual(errors, "")
+        self.assert_only_unchanged_input(before)
+
+    def test_invalid_input_fails_without_rendering_or_writing(self):
+        invalid_plan = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+        invalid_plan["reviewed_on"] = "DO_NOT_ECHO_DATE"
+        for payload in ('{"DO_NOT_ECHO_CONTENT":', json.dumps(invalid_plan)):
+            with self.subTest(payload_type="invalid JSON" if payload.startswith('{"DO_NOT') else "invalid schema"):
+                self.input.write_text(payload, encoding="utf-8")
+                before = self.input.read_bytes()
+                with patch.object(app, "render_plan") as render, patch.object(app, "save_plan") as save:
+                    output, errors = self.run_cli([str(self.input), "--check"], 2)
+                render.assert_not_called()
+                save.assert_not_called()
+                self.assertEqual(output, "")
+                self.assertTrue(errors.startswith("Error: "))
+                self.assert_only_unchanged_input(before)
+
+    def test_check_rejects_output_and_force_before_reading_or_writing(self):
+        before = self.input.read_bytes()
+        for options in (["--output", "DO_NOT_ECHO_OUTPUT.html"],
+                        ["--output=DO_NOT_ECHO_OUTPUT.html"],
+                        ["--output", "private-output/emergency-plan.html"],
+                        ["--output", ""], ["--force"],
+                        ["--output", "DO_NOT_ECHO_OUTPUT.html", "--force"]):
+            with self.subTest(option_count=len(options)):
+                with patch.object(app, "load_plan") as load, patch.object(app, "render_plan") as render, \
+                        patch.object(app, "save_plan") as save:
+                    output, errors = self.run_cli([str(self.input), "--check", *options], 2)
+                load.assert_not_called()
+                render.assert_not_called()
+                save.assert_not_called()
+                self.assertEqual(output, "")
+                self.assertEqual(errors, "Error: The --check option cannot be combined with --output or --force.\n")
+                self.assert_only_unchanged_input(before)
+
+    def test_template_commands_reject_check_without_creating_a_draft(self):
+        before = self.input.read_bytes()
+        for command in ("init", "template"):
+            with self.subTest(command=command), patch.object(app, "save_template") as save:
+                output, errors = self.run_cli([command, "--check"], 2)
+            save.assert_not_called()
+            self.assertEqual(output, "")
+            self.assertEqual(errors, "Error: Invalid command arguments. Use --help for usage.\n")
+            self.assert_only_unchanged_input(before)
+
+    def test_generation_still_creates_default_and_explicit_output_after_check(self):
+        self.run_cli([str(self.input), "--check"], 0)
+        self.run_cli([str(self.input)], 0)
+        default = Path("private-output/emergency-plan.html")
+        self.assertIn("Fictional household example", default.read_text(encoding="utf-8"))
+        self.run_cli([str(self.input), "--force"], 0)
+        explicit = Path("private-output/another-plan.html")
+        self.run_cli([str(self.input), "--output", str(explicit)], 0)
+        self.assertEqual(explicit.read_bytes(), default.read_bytes())
 
 
 class TemplateTests(unittest.TestCase):
