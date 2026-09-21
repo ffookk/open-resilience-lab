@@ -191,7 +191,7 @@ section:target{outline:2px solid currentColor;outline-offset:6px}section{scroll-
 @media print{@page{margin:15mm}body{background:white;padding:0;max-width:none;font-size:11pt}article{border-radius:0}.notice{background:white}h2,h3{break-after:avoid;page-break-after:avoid}article p{break-before:avoid-page}footer{border-top:1px solid #888}}
 ''' + ''.join(presentation_style) + '''
 </style></head><body><a class="skip-link" href="#plan-content">Skip to plan content</a><header id="plan-top"><p>Household offline plan</p><h1>''' + escape(plan["title"]) + '''</h1><p>Region: ''' + escape(plan["region"]) + '''
-Household review date: ''' + escape(plan["reviewed_on"]) + '''</p></header>
+Household review date: <time datetime="''' + escape(plan["reviewed_on"]) + '''">''' + escape(plan["reviewed_on"]) + '''</time></p></header>
 <p class="notice">This file may contain private information. View it only on a trusted local device and keep local copies and printouts secure.
 Use the browser Print menu; all content is included in this file.</p>
 <nav aria-label="Plan sections"><a href="#contacts">Contacts</a> <a href="#meeting-points">Meeting points</a> <a href="#household">Household</a> ''' + ('' if omit_notes else '<a href="#notes">Notes</a> ') + '''<a href="#sources">Sources</a></nav>
