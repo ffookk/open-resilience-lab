@@ -151,6 +151,14 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(output.getvalue(), "")
         self.assertIn("Error:", errors.getvalue())
 
+    def test_summary_reports_only_fixed_counts_after_success(self):
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(app.main([str(EXAMPLE), "--check", "--quiet", "--summary"]), 0)
+        self.assertEqual(json.loads(output.getvalue().removeprefix("SUMMARY: ")), {"contacts": 1, "meeting_points": 1, "household_members": 1, "sources": 0})
+        with patch.object(app, "load_plan", side_effect=app.PlanError("Invalid plan.")), contextlib.redirect_stdout(io.StringIO()) as output, contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(app.main([str(EXAMPLE), "--check", "--summary"]), 2)
+        self.assertEqual(output.getvalue(), "")
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):

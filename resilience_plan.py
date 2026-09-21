@@ -268,6 +268,13 @@ def save_template(output_path=TEMPLATE_PATH, force=False):
         raise PlanError("Unable to save the template. Check local permissions and storage.") from None
 
 
+def _print_summary(plan):
+    print("SUMMARY: " + json.dumps({
+        "contacts": len(plan["contacts"]), "meeting_points": len(plan["meeting_points"]),
+        "household_members": len(plan.get("household", [])), "sources": len(plan.get("sources", [])),
+    }))
+
+
 def main(argv=None):
     arguments = list(sys.argv[1:] if argv is None else argv)
     initializing = bool(arguments) and arguments[0] in ("init", "template")
@@ -286,6 +293,7 @@ def main(argv=None):
         parser.add_argument("--output", help="local HTML destination (default: private-output/emergency-plan.html)")
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
         parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")
+        parser.add_argument("--summary", action="store_true", help="print aggregate counts after success, without plan text or paths")
     try:
         args = parser.parse_args(arguments[1:] if initializing else arguments)
         if initializing:
@@ -300,6 +308,8 @@ def main(argv=None):
         if args.check:
             if not args.quiet:
                 print("Plan input passed format validation. No HTML was rendered or saved.")
+            if args.summary:
+                _print_summary(plan)
             return 0
         output = "private-output/emergency-plan.html" if args.output is None else args.output
         save_plan(render_plan(plan), output, args.input, args.force)
@@ -308,6 +318,8 @@ def main(argv=None):
         return 2
     if not args.quiet:
         print("Plan saved locally. Keep the input, HTML, and printouts private.")
+    if args.summary:
+        _print_summary(plan)
     return 0
 
 

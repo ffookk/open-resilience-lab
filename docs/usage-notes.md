@@ -19,3 +19,4 @@
 - `region` is a text label supplied by the person completing the plan; it is not converted into an administrative code and does not select regional rules.
 - Use `python3 resilience_plan.py --schema-version` to print the supported schema without opening a plan or creating files.
 - Add `--quiet` to generation, `--check`, or `init` / `template` to suppress routine success messages; errors and exit codes remain available.
+- `--summary` prints JSON counts for contacts, meeting points, household members, and sources only after successful generation or checking. It remains visible with `--quiet` and contains no plan text or paths.
