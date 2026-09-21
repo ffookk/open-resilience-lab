@@ -166,6 +166,12 @@ class PlanTests(unittest.TestCase):
             self.assertEqual(app.main([str(EXAMPLE), "--check", "--large-text"]), 2)
         self.assertIn("HTML presentation options", errors.getvalue())
 
+    def test_compact_layout_keeps_all_plan_content(self):
+        document = app.render_plan(self.plan, compact=True)
+        self.assertIn("article{padding:8px;margin:6px 0}", document)
+        self.assertIn(self.plan["contacts"][0]["name"], document)
+        self.assertIn(self.plan["notes"], document)
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
