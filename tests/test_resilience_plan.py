@@ -211,6 +211,12 @@ class PlanTests(unittest.TestCase):
         self.assertNotIn('id="household"', document)
         self.assertEqual(self.plan["household"][0]["name"], "PRIVATE_MEMBER_MARKER")
 
+    def test_omit_region_removes_the_header_value_without_changing_input(self):
+        self.plan["region"] = "PRIVATE_REGION_MARKER"
+        self.assertIn("PRIVATE_REGION_MARKER", app.render_plan(self.plan))
+        self.assertNotIn("PRIVATE_REGION_MARKER", app.render_plan(self.plan, omit_region=True))
+        self.assertEqual(self.plan["region"], "PRIVATE_REGION_MARKER")
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):

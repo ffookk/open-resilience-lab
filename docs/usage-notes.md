@@ -27,3 +27,4 @@
 - `--landscape` requests landscape print orientation. Browser print settings and the selected printer may override CSS preferences.
 - `--neutral-title` replaces only the browser-tab title with "Household offline plan". The visible heading and other private content remain in the file.
 - `--omit-household` excludes the household/support-needs section and its navigation link. It does not remove member information repeated in contacts, notes, or other fields.
+- `--omit-region` excludes the region label from the HTML header; the JSON and any regional information repeated elsewhere remain unchanged.
