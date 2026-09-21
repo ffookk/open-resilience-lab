@@ -147,7 +147,7 @@ def load_plan(path):
     return validate_plan(plan)
 
 
-def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, omit_notes=False, landscape=False, neutral_title=False, omit_household=False, omit_region=False):
+def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, omit_notes=False, landscape=False, neutral_title=False, omit_household=False, omit_region=False, paper=None):
     validate_plan(plan)
     presentation_style = []
     if landscape:
@@ -168,6 +168,8 @@ def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, o
     household = cards((item["name"], item.get("needs", "Not provided")) for item in plan.get("household", []))
     sources = cards((item["title"], item["url"] + "\nEntered review date: " + item["verified_on"])
                     for item in plan.get("sources", []))
+    if paper in ("a4", "letter"):
+        presentation_style.append("@media print{@page{size:" + paper + (" landscape" if landscape else "") + "}}")
     return '''<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -314,6 +316,7 @@ def main(argv=None):
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
         parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")
         parser.add_argument("--summary", action="store_true", help="print aggregate counts after success, without plan text or paths")
+        parser.add_argument("--paper", choices=("a4", "letter"), help="request A4 or Letter paper; otherwise keep browser defaults")
         parser.add_argument("--omit-region", action="store_true", help="exclude the entered region from the HTML header")
         parser.add_argument("--omit-household", action="store_true", help="exclude the household and support-needs section from HTML")
         parser.add_argument("--neutral-title", action="store_true", help="use a fixed browser-tab title while retaining the visible plan heading")
@@ -332,7 +335,7 @@ def main(argv=None):
             return 0
         if args.check and (args.output is not None or args.force):
             raise PlanError("The --check option cannot be combined with --output or --force.")
-        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast, "omit_notes": args.omit_notes, "landscape": args.landscape, "neutral_title": args.neutral_title, "omit_household": args.omit_household, "omit_region": args.omit_region}
+        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast, "omit_notes": args.omit_notes, "landscape": args.landscape, "neutral_title": args.neutral_title, "omit_household": args.omit_household, "omit_region": args.omit_region, "paper": args.paper}
         if args.check and any(presentation.values()):
             raise PlanError("HTML presentation options cannot be combined with --check.")
         plan = load_plan(args.input)

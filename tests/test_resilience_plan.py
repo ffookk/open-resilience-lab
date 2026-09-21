@@ -217,6 +217,14 @@ class PlanTests(unittest.TestCase):
         self.assertNotIn("PRIVATE_REGION_MARKER", app.render_plan(self.plan, omit_region=True))
         self.assertEqual(self.plan["region"], "PRIVATE_REGION_MARKER")
 
+    def test_paper_choices_are_safe_and_combine_with_landscape(self):
+        self.assertIn("size:letter landscape", app.render_plan(self.plan, paper="letter", landscape=True))
+        self.assertIn("size:a4", app.render_plan(self.plan, paper="a4"))
+        self.assertNotIn("STYLE_PAYLOAD", app.render_plan(self.plan, paper="STYLE_PAYLOAD"))
+        with contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(app.main([str(EXAMPLE), "--paper", "PRIVATE_VALUE"]), 2)
+        self.assertNotIn("PRIVATE_VALUE", errors.getvalue())
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
