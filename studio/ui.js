@@ -24,7 +24,14 @@
     const hint = node("p", undefined, "hint"); hint.id = id + "-help";
     const updateCount = () => {hint.textContent = date ? "Enter the actual review date after household or source review. No date is inserted automatically." : Array.from(input.value).length + " / " + limit + " characters. Newlines and tabs are preserved.";};
     input.addEventListener("input", () => {draft.set(path, input.value); updateCount(); changed();});
-    updateCount(); wrapper.append(label, input, hint); parent.append(wrapper);
+    updateCount(); wrapper.append(label, input, hint);
+    if (!date && limit > 200) {
+      const expand = button("Expand text editor", () => {
+        const expanded = input.rows === 10; input.rows = expanded ? 3 : 10;
+        expand.textContent = expanded ? "Expand text editor" : "Shrink text editor"; expand.setAttribute("aria-expanded", String(!expanded));
+      }); expand.setAttribute("aria-controls", id); expand.setAttribute("aria-expanded", "false"); wrapper.append(expand);
+    }
+    parent.append(wrapper);
   }
   function toggle(parent, text, path, present, initial, rerender = true) {
     const label = node("label", undefined, "toggle"), control = node("input"); control.type = "checkbox"; control.checked = present;
