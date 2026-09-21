@@ -30,3 +30,4 @@
 - `--omit-region` excludes the region label from the HTML header; the JSON and any regional information repeated elsewhere remain unchanged.
 - `--paper a4` or `--paper letter` requests a print paper size and can be combined with `--landscape`. Without it, the browser chooses the paper size.
 - `--font sans`, `--font serif`, or `--font monospace` selects a local font family. No font files are downloaded; available fonts depend on the device.
+- Use complete option names such as `--output`; abbreviated long options are rejected to avoid ambiguity as the CLI grows.
