@@ -172,6 +172,12 @@ class PlanTests(unittest.TestCase):
         self.assertIn(self.plan["contacts"][0]["name"], document)
         self.assertIn(self.plan["notes"], document)
 
+    def test_omit_notes_removes_content_without_changing_input(self):
+        self.plan["notes"] = "PRIVATE_NOTES_MARKER"
+        self.assertIn("PRIVATE_NOTES_MARKER", app.render_plan(self.plan))
+        self.assertNotIn("PRIVATE_NOTES_MARKER", app.render_plan(self.plan, omit_notes=True))
+        self.assertEqual(self.plan["notes"], "PRIVATE_NOTES_MARKER")
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
