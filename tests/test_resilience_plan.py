@@ -238,6 +238,15 @@ class PlanTests(unittest.TestCase):
         self.assertNotIn("PRIVATE_VALUE", errors.getvalue())
         self.assertIn("Invalid command arguments", errors.getvalue())
 
+    def test_source_ports_are_validated_without_echoing_urls(self):
+        for suffix in (":PRIVATE_VALUE/path", ":65536/path"):
+            self.plan["sources"] = [{"title": "Example", "url": "https://example.invalid" + suffix, "verified_on": "2026-09-20"}]
+            with self.assertRaises(app.PlanError) as rejected:
+                app.validate_plan(self.plan)
+            self.assertNotIn("PRIVATE_VALUE", str(rejected.exception))
+        self.plan["sources"][0]["url"] = "https://example.invalid:8443/path"
+        self.assertEqual(app.validate_plan(self.plan), self.plan)
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):

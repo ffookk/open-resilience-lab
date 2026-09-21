@@ -111,6 +111,7 @@ def validate_plan(plan):
         _text(item["url"], 2000)
         try:
             address = urlsplit(item["url"])
+            address.port  # Reject malformed or out-of-range ports without requesting the URL.
             valid_url = (address.scheme == "https" and bool(address.hostname)
                          and address.username is None and address.password is None
                          and not address.query and not address.fragment
