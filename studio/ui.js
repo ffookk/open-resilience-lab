@@ -64,6 +64,12 @@
         }); move.disabled = index + delta < 0 || index + delta >= entries.length;
         move.setAttribute("aria-label", text + ": " + labels[key] + " " + (index + 1)); actions.append(move);
       }
+      for (const [text, destination] of [["Move to first", 0], ["Move to last", entries.length - 1]]) {
+        const move = button(text, () => {
+          if (draft.moveTo(key, index, destination)) {renderForm(); changed(); byId(pathId([key, destination, fields[0][0]])).focus();}
+        }); move.disabled = index === destination;
+        move.setAttribute("aria-label", text + ": " + labels[key] + " " + (index + 1)); actions.append(move);
+      }
       const duplicate = button("Duplicate", () => {
         if (draft.duplicate(key, index)) {renderForm(); changed(); byId(pathId([key, index + 1, fields[0][0]])).focus();}
       }); duplicate.disabled = entries.length >= maximum;
