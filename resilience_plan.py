@@ -276,6 +276,7 @@ def main(argv=None):
                      "Generate an offline plan locally. Input and HTML contain private data; never commit real plans."),
         epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else
                 "Start a new draft: python3 resilience_plan.py init (alias: template). Use init --help for details."))
+    parser.add_argument("--schema-version", action="version", version="Schema version 1", help="print the supported input schema and exit")
     if initializing:
         parser.add_argument("--output", default=TEMPLATE_PATH, help="JSON destination within private-input (default: private-input/household.json)")
         parser.add_argument("--force", action="store_true", help="replace only an unchanged template; filled plans and unrelated files remain protected")
