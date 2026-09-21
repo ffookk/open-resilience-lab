@@ -28,3 +28,4 @@
 - `--neutral-title` replaces only the browser-tab title with "Household offline plan". The visible heading and other private content remain in the file.
 - `--omit-household` excludes the household/support-needs section and its navigation link. It does not remove member information repeated in contacts, notes, or other fields.
 - `--omit-region` excludes the region label from the HTML header; the JSON and any regional information repeated elsewhere remain unchanged.
+- `--paper a4` or `--paper letter` requests a print paper size and can be combined with `--landscape`. Without it, the browser chooses the paper size.
