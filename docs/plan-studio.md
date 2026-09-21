@@ -70,3 +70,5 @@ Parity fixtures compare accepted and rejected inputs with the existing Python va
 **Preview section** focuses the live preview on one section while keeping plan details visible. Choose **All sections** to restore the complete view. JSON and HTML downloads always retain their existing full contents.
 
 **Compact preview cards** reduces spacing within the live preview without hiding or truncating any content. It affects neither the editor nor downloaded layouts.
+
+**Larger preview text** increases live preview text and heading sizes for reading. This temporary display choice does not affect downloads or record a plan edit.
