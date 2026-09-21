@@ -474,6 +474,25 @@ def _bundle_command(arguments, *, verify=False):
     return 0
 
 
+def _studio_command(arguments):
+    from plan_studio import write_studio
+    from private_storage import StorageError
+    parser = PrivateArgumentParser(prog="resilience-plan studio", allow_abbrev=False,
+                                   description="Create a blank offline graphical editor. No household input is embedded or uploaded.")
+    parser.add_argument("--output", default="private-output/plan-studio.html", help="new HTML file under private-output; no overwrite option")
+    try:
+        args = parser.parse_args(arguments)
+        write_studio(args.output)
+    except (PlanError, StorageError) as error:
+        print("Error: " + str(error), file=sys.stderr)
+        return 2
+    except KeyboardInterrupt:
+        print("Studio creation interrupted. Check the destination locally before opening any remaining file.", file=sys.stderr)
+        return 130
+    print("Blank offline studio created. Open it locally; entered data remains in the tab until you explicitly download a file.")
+    return 0
+
+
 def _print_summary(plan):
     print("SUMMARY: " + json.dumps({
         "contacts": len(plan["contacts"]), "meeting_points": len(plan["meeting_points"]),
@@ -483,6 +502,8 @@ def _print_summary(plan):
 
 def main(argv=None):
     arguments = list(sys.argv[1:] if argv is None else argv)
+    if arguments and arguments[0] == "studio":
+        return _studio_command(arguments[1:])
     if arguments and arguments[0] == "wizard":
         return _wizard_command(arguments[1:])
     if arguments and arguments[0] in ("bundle", "verify-bundle"):
@@ -493,7 +514,7 @@ def main(argv=None):
         description=("Create a private editable JSON draft. Review it before generating a plan." if initializing else
                      "Generate an offline plan locally. Input and HTML contain private data; never commit real plans."),
         epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else
-                "Create a plan: python3 resilience_plan.py wizard --output private-input/household.json. Or start a draft with init (alias: template). Use bundle --help or verify-bundle --help for offline exports."))
+                "Create a plan: python3 resilience_plan.py wizard --output private-input/household.json. Or start a draft with init (alias: template). Use studio --help for the graphical editor, or bundle --help and verify-bundle --help for offline exports."))
     parser.add_argument("--schema-version", action="version", version="Schema version 1", help="print the supported input schema and exit")
     parser.add_argument("--quiet", action="store_true", help="suppress routine success messages; errors remain visible")
     if initializing:

@@ -23,7 +23,8 @@ Acceptance: every specific policy or preparedness requirement can be traced to i
 - [ ] Complete browser viewing with a real network disconnection, long-plan pagination, and physical printing checks.
 - [x] Add a guided local terminal wizard with validated retries, optional fields, hidden prompts, cancellation, and exclusive private saving.
 - [x] Export full HTML, portable text, and compact contact/meeting cards into a new private directory with a last-published integrity manifest and bounded verification.
-- [ ] Add a graphical editor and HTML import.
+- [x] Add a blank, self-contained graphical studio with complete schema-v1 editing, strict local JSON import, validated JSON round trips, reorderable lists, safe previews, and explicit printable exports.
+- [ ] Import arbitrary plan HTML.
 
 Current evidence: automated CLI tests, strict validation, HTML escaping, restricted file permissions, overwrite protection, absence-of-external-resources checks,
 and a historical desktop/narrow-viewport and two-page A4 PDF record in one offline Chrome context.
