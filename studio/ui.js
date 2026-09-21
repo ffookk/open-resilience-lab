@@ -80,7 +80,8 @@
     preview.replaceChildren();
     const title = node("h3", draft.plan.title || "Untitled draft"); title.dir = "auto";
     preview.append(title, node("p", "Region: " + (draft.plan.region || "Not entered")), node("p", "User-supplied household review date: " + (draft.plan.reviewed_on || "Not entered")));
-    api.sections(draft.plan).forEach(section => {
+    api.sections(draft.plan).forEach((section, index) => {
+      if (byId("preview-section").value !== "all" && byId("preview-section").value !== String(index)) return;
       const block = node("section"); block.append(node("h4", section.heading));
       if (!section.entries.length) block.append(node("p", "Not provided", "hint"));
       section.entries.forEach(item => {const card = node("article", undefined, "preview-card"); const heading = node("h5", item.title || "Untitled entry"), body = node("p", item.text); heading.dir = body.dir = "auto"; card.append(heading, body); block.append(card);});
@@ -124,6 +125,7 @@
     showErrors = true; changed(); const errors = api.validate(draft.plan);
     if (errors.length) {byId("validation-errors").focus();} else message("Format checks passed. This does not verify household arrangements, source facts, or safety.");
   });
+  byId("preview-section").addEventListener("change", renderPreview);
   byId("toggle-preview").addEventListener("click", event => {
     const panel = byId("preview-panel"); panel.hidden = !panel.hidden;
     event.currentTarget.textContent = panel.hidden ? "Show live preview" : "Hide live preview";
