@@ -57,7 +57,7 @@ Enter only necessary information on a trusted device. No network requests, brows
 Imported files, downloads, printouts, and visible previews may contain private data. Browser downloads use your browser's destination and permissions.
 Do not publish a real plan. This tool gives no medical advice, independent factual review, or safety certification.</div>
 <div class="toolbar"><div><label for="import-json">Import local JSON (up to 256 KiB)</label><input id="import-json" type="file" accept=".json,application/json"></div>
-<button id="reset" type="button" class="danger">Reset to blank draft</button></div>
+<button id="toggle-preview" type="button" class="secondary" aria-controls="preview-panel" aria-expanded="true">Hide live preview</button><button id="reset" type="button" class="danger">Reset to blank draft</button></div>
 <noscript><p class="privacy">Enable JavaScript locally to use this editor, or use the Python wizard. No draft is saved automatically.</p></noscript>
 <nav aria-label="Editor sections"><a href="#section-basics">Plan details</a><a href="#section-contacts">Contacts</a><a href="#section-meeting_points">Meeting arrangements</a><a href="#section-household">Household</a><a href="#section-notes">Notes</a><a href="#section-sources">Sources</a><a href="#preview-panel">Preview</a></nav>
 <div class="layout"><div id="editor-column"><section class="validation-panel" aria-labelledby="validation-title"><h2 id="validation-title">Review and save</h2>

@@ -124,6 +124,12 @@
     showErrors = true; changed(); const errors = api.validate(draft.plan);
     if (errors.length) {byId("validation-errors").focus();} else message("Format checks passed. This does not verify household arrangements, source facts, or safety.");
   });
+  byId("toggle-preview").addEventListener("click", event => {
+    const panel = byId("preview-panel"); panel.hidden = !panel.hidden;
+    event.currentTarget.textContent = panel.hidden ? "Show live preview" : "Hide live preview";
+    event.currentTarget.setAttribute("aria-expanded", String(!panel.hidden));
+    document.querySelector(".layout").classList.toggle("preview-hidden", panel.hidden);
+  });
   byId("first-issue").addEventListener("click", () => {
     showErrors = true; changed(); const errors = api.validate(draft.plan);
     if (errors.length) focusPath(errors[0].path); else message("No format issues to focus. Household decisions and source facts remain unverified.");
