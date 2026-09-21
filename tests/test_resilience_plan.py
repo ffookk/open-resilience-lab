@@ -184,6 +184,13 @@ class PlanTests(unittest.TestCase):
         self.assertIn('href="#plan-content"', document)
         self.assertIn('<main id="plan-content" tabindex="-1">', document)
 
+    def test_section_navigation_respects_omitted_notes(self):
+        document = app.render_plan(self.plan)
+        for target in ("contacts", "meeting-points", "household", "notes", "sources"):
+            self.assertIn('href="#' + target + '"', document)
+            self.assertIn('id="' + target + '"', document)
+        self.assertNotIn('href="#notes"', app.render_plan(self.plan, omit_notes=True))
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
