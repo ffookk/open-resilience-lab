@@ -10,3 +10,5 @@
 @media print{#preview-panel>:not(#preview-content){display:none}}
 
 #preview-content.compact .preview-card{padding:.4rem;margin:.25rem 0}#preview-content.compact .preview-card p{margin:.25rem 0}
+
+#preview-content.large-text{font-size:1.25rem}#preview-content.large-text :is(h3,h4,h5){font-size:1.1em}
