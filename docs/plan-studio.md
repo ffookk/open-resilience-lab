@@ -74,3 +74,5 @@ Parity fixtures compare accepted and rejected inputs with the existing Python va
 **Larger preview text** increases live preview text and heading sizes for reading. This temporary display choice does not affect downloads or record a plan edit.
 
 Long-text fields offer **Expand text editor** and **Shrink text editor** to switch between three and ten visible rows. The field value is preserved. Adding, moving, or removing entries can rebuild the form and restore its default field sizes.
+
+**Duplicate** inserts an independent copy immediately after an entry, including optional support needs when present. It respects each list limit, marks the draft as edited, and focuses the new entry for review.
