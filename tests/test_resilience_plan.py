@@ -144,6 +144,13 @@ class PlanTests(unittest.TestCase):
         load.assert_not_called()
         save.assert_not_called()
 
+    def test_quiet_suppresses_success_but_not_errors(self):
+        with contextlib.redirect_stdout(io.StringIO()) as output, contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(app.main([str(EXAMPLE), "--check", "--quiet"]), 0)
+            self.assertEqual(app.main([str(EXAMPLE), "--check", "--force", "--quiet"]), 2)
+        self.assertEqual(output.getvalue(), "")
+        self.assertIn("Error:", errors.getvalue())
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
