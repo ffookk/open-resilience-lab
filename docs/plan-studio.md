@@ -80,3 +80,5 @@ Long-text fields offer **Expand text editor** and **Shrink text editor** to swit
 **Move to first** and **Move to last** relocate one complete entry while preserving the relative order of the other entries. The action is disabled when the entry is already at that end and otherwise marks the draft as edited.
 
 **Inspect draft JSON** reveals a read-only view of all current fields, including incomplete values and optional-field presence. The inspector updates with edits, is unaffected by the preview section filter, and does not save or validate a file.
+
+Each editor section has **Hide fields** and **Show fields** controls. Collapsing retains data and validation; issue navigation automatically opens its target section. Import and reset reopen Plan details when focusing the title. Section visibility lasts only in the current tab.
