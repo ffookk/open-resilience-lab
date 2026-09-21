@@ -130,7 +130,7 @@
     byId("validation-status").textContent = errors.length ? "Incomplete draft: " + errors.length + " format issue(s). Review fields before export." : "Schema format checks pass. Household decisions and source facts remain unverified.";
     ["export-json", "export-html", "export-cards"].forEach(id => byId(id).disabled = errors.length > 0);
     byId("confirm-saved").disabled = draft.pending === null;
-    renderErrors(errors); renderPreview();
+    renderErrors(errors); renderPreview(); byId("draft-json").value = JSON.stringify(draft.plan, null, 2);
   }
   function download(content, type, filename) {
     const objectURL = URL.createObjectURL(new Blob([content], {type}));
