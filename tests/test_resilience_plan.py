@@ -43,7 +43,8 @@ class PlanTests(unittest.TestCase):
     def test_output_has_no_active_external_resources(self):
         document = app.render_plan(self.plan)
         self.assertNotRegex(document, r"(?i)<\s*(script|link|img|iframe|object|embed|form|base|video|audio)\b")
-        self.assertNotRegex(document, r"(?i)\b(src|href|action)\s*=|@import|url\s*\(")
+        self.assertNotRegex(document, r"(?i)\b(src|action)\s*=|@import|url\s*\(")
+        self.assertNotRegex(document, r'(?i)\bhref\s*=\s*(?!"#[a-z][a-z-]*")')
         self.assertIn("default-src 'none'", document)
         self.assertIn("connect-src 'none'", document)
 
@@ -177,6 +178,11 @@ class PlanTests(unittest.TestCase):
         self.assertIn("PRIVATE_NOTES_MARKER", app.render_plan(self.plan))
         self.assertNotIn("PRIVATE_NOTES_MARKER", app.render_plan(self.plan, omit_notes=True))
         self.assertEqual(self.plan["notes"], "PRIVATE_NOTES_MARKER")
+
+    def test_skip_link_targets_the_focusable_main_landmark(self):
+        document = app.render_plan(self.plan)
+        self.assertIn('href="#plan-content"', document)
+        self.assertIn('<main id="plan-content" tabindex="-1">', document)
 
 
 class CheckTests(unittest.TestCase):
