@@ -22,6 +22,7 @@ Acceptance: every specific policy or preparedness requirement can be traced to i
 - [ ] Recheck PDF pagination for the English presentation.
 - [ ] Complete browser viewing with a real network disconnection, long-plan pagination, and physical printing checks.
 - [x] Add a guided local terminal wizard with validated retries, optional fields, hidden prompts, cancellation, and exclusive private saving.
+- [x] Export full HTML, portable text, and compact contact/meeting cards into a new private directory with a last-published integrity manifest and bounded verification.
 - [ ] Add a graphical editor and HTML import.
 
 Current evidence: automated CLI tests, strict validation, HTML escaping, restricted file permissions, overwrite protection, absence-of-external-resources checks,
