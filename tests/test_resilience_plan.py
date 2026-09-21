@@ -225,6 +225,13 @@ class PlanTests(unittest.TestCase):
             self.assertEqual(app.main([str(EXAMPLE), "--paper", "PRIVATE_VALUE"]), 2)
         self.assertNotIn("PRIVATE_VALUE", errors.getvalue())
 
+    def test_font_selection_uses_only_fixed_local_families(self):
+        self.assertIn("body{font-family:Georgia,serif}", app.render_plan(self.plan, font="serif"))
+        self.assertNotIn("FONT_PAYLOAD", app.render_plan(self.plan, font="FONT_PAYLOAD"))
+        with contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(app.main([str(EXAMPLE), "--font", "PRIVATE_VALUE"]), 2)
+        self.assertNotIn("PRIVATE_VALUE", errors.getvalue())
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
