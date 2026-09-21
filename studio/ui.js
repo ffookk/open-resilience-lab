@@ -153,6 +153,7 @@
     showErrors = true; changed(); const errors = api.validate(draft.plan);
     if (errors.length) {byId("validation-errors").focus();} else message("Format checks passed. This does not verify household arrangements, source facts, or safety.");
   });
+  byId("review-link").addEventListener("click", () => byId("review-save").focus());
   byId("large-preview").addEventListener("change", event => preview.classList.toggle("large-text", event.target.checked));
   byId("compact-preview").addEventListener("change", event => preview.classList.toggle("compact", event.target.checked));
   byId("preview-section").addEventListener("change", renderPreview);
