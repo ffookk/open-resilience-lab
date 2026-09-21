@@ -7,7 +7,7 @@ Swiss security policy strategy provides the first research leads. Independent co
 
 ## Current status
 
-A Python CLI prototype with no third-party dependencies creates a reviewed local plan through a guided terminal wizard, creates editable JSON drafts, and generates self-contained HTML household plans.
+A Python CLI prototype with no third-party dependencies creates a reviewed local plan through a guided terminal wizard, creates editable JSON drafts, generates self-contained HTML household plans, and exports private offline bundles with printable cards and an integrity check.
 The tool makes no network requests and runs no telemetry. Generated pages contain no scripts or external resources; source URLs appear only as text.
 Input validation, HTML escaping, overwrite protection, file permissions, and generation with Python sockets disabled have been checked.
 The earlier bilingual version of the fictional example passed an offline desktop/narrow-viewport check in one Chrome engine and a two-page A4 PDF check; see the [browser check record](docs/browser-check.md). The current English presentation has also passed an offline desktop/narrow-screen layout check in the same Chrome version; its PDF pagination has not been rechecked.
@@ -46,6 +46,15 @@ python3 resilience_plan.py wizard --output private-input/household.json
 
 The wizard uses hidden terminal prompts, retries invalid entries, and saves only after complete validation and your confirmation. Cancellation or EOF while answering leaves no output. It requires a trusted interactive terminal and POSIX private-storage support; confirmation is not independent review.
 
+To export a validated plan as full HTML, portable text, and compact printable contact/meeting cards, create a new [private offline bundle](docs/private-bundles.md):
+
+```sh
+python3 resilience_plan.py bundle examples/fictional-household.json --output private-output/example-bundle
+python3 resilience_plan.py verify-bundle private-output/example-bundle
+```
+
+Open `plan.html` or `cards.html` inside the new directory locally. The fourth file, `manifest.json`, records byte counts and SHA-256 digests; verification detects missing, changed, malformed, or unexpected files. It does not establish authorship, factual accuracy, or confidentiality. All bundle files and printouts may contain private data. This workflow performs no upload, encryption, or automatic redaction.
+
 To prepare a personal plan manually, run `init` from the repository root to create a draft in the ignored `private-input/` directory:
 
 ```sh
@@ -60,7 +69,7 @@ Enter the review date only after reviewing the plan. To try generation and print
 The tool does not detect or verify the other placeholders. The person completing the draft must replace and check each one; passing format validation does not establish that the content has been reviewed.
 
 `template` is an alias for `init`; `python3 resilience_plan.py init --help` displays template command help.
-If an existing JSON input file in the current directory is named `wizard`, use `./wizard`. For files named `init` or `template`, use
+For JSON input files named `wizard`, `bundle`, or `verify-bundle`, prefix the filename with `./`. For files named `init` or `template`, use
 `python3 resilience_plan.py ./init` or `python3 resilience_plan.py ./template` to read it as an input file.
 Use `--output private-input/another-plan.json` to create another draft. The destination must be under
 `private-input/` in the current directory and have a `.json` extension; neither the destination nor its directories may be symbolic links.
@@ -73,7 +82,7 @@ Existing HTML output is protected by default; add `--force` when you intend to r
 a hard link to the input, or any output symbolic link. Created HTML files use `0600` permissions on POSIX systems,
 and a newly created immediate output directory uses `0700`; existing directory permissions are unchanged.
 
-**Real input files, HTML, PDFs, and printouts may contain private information.** Git ignores `private-input/` and `private-output/`,
+**Real input files, bundle files, HTML, PDFs, and printouts may contain private information.** Git ignores `private-input/` and `private-output/`,
 but `.gitignore` provides neither encryption nor access control and cannot prevent forced commits, cloud synchronization, or editor extension access.
 Use trusted local devices and storage, enter only necessary information, check backup and printing locations, and never paste a real plan into an issue or PR.
 HTML is for previewing and printing. To update a plan, edit the original JSON and generate it again; importing HTML back into JSON is not supported.
@@ -107,6 +116,7 @@ python3 -m unittest discover -s tests -v
 Functional tests cover malicious HTML escaping, required fields and type/length limits, invalid/duplicate/oversized JSON, errors that do not echo input,
 overwrite and link protection, POSIX permissions, absence of external resource markup, and template creation and CLI generation with Python sockets disabled.
 Template tests also cover the unreviewed date placeholder, generation through the original CLI after editing, overwrite restrictions, parent-directory links, directory boundaries, and argument errors that do not echo supplied values.
+Wizard tests cover hidden-input refusal, validated retries, cancellation, safe saving, and no-clobber behavior. Bundle tests cover complete exports, escaping, bounded integrity checks, malformed or linked files, private permissions, and cleanup after handled failures or interruptions.
 These checks do not establish the privacy or reliability of browser extensions, operating systems, cloud synchronization, printers, or real disaster use.
 Before contributing, also follow the repository checks in the [privacy guide](docs/privacy.md).
 
@@ -120,6 +130,7 @@ Implemented workflow and remaining goals:
 - Implemented: English section labels, print styles, narrow-screen CSS, and an entirely fictional example. The earlier bilingual presentation passed one Chrome desktop/narrow-viewport and PDF check; the English presentation has passed a fresh desktop/narrow-screen check, while its PDF pagination, other browsers, and physical printing still need checking.
 - Implemented: save JSON, edit it, and generate again; output can include sources and review dates supplied by the person completing the plan.
 - Implemented: `init` / `template` creates an unreviewed draft in `private-input/` without modifying the repository example and preserves the original input-file CLI usage.
+- Implemented: guided terminal creation with hidden validated prompts, and private bundles containing full HTML, portable text, contact/meeting cards, and a bounded integrity verifier.
 - Planned: a graphical editor, importing plan HTML, regional official-source verification, and real usage feedback.
 
 The current format is JSON schema version 1, implemented with Python's standard library. Initial regional sources have not yet been selected or verified.

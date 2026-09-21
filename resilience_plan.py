@@ -432,6 +432,48 @@ def _wizard_command(arguments):
     return 0
 
 
+def export_bundle(input_path, destination, *, presentation=None):
+    from bundle_export import create_bundle
+    from private_storage import StorageError
+    plan = load_plan(input_path)
+    try:
+        return create_bundle(plan, destination, html_renderer=render_plan, presentation=presentation)
+    except StorageError as error:
+        raise PlanError(str(error)) from None
+
+
+def _bundle_command(arguments, *, verify=False):
+    from bundle_export import verify_bundle
+    from private_storage import StorageError
+    parser = PrivateArgumentParser(prog="resilience-plan " + ("verify-bundle" if verify else "bundle"), allow_abbrev=False,
+                                   description="Inspect or create private offline exports. No upload, encryption, or automatic redaction.")
+    if verify:
+        parser.add_argument("directory", help="local directory containing the four fixed bundle files")
+    else:
+        parser.add_argument("input", help="local validated JSON plan")
+        parser.add_argument("--output", required=True, help="new directory under private-output")
+        parser.add_argument("--paper", choices=("a4", "letter"), help="request a print paper size")
+        parser.add_argument("--font", choices=("sans", "serif", "monospace"), help="choose a local font family")
+        for flag in ("large-text", "compact", "high-contrast", "landscape", "neutral-title"):
+            parser.add_argument("--" + flag, action="store_true", help="apply this existing presentation option to HTML output")
+    try:
+        args = parser.parse_args(arguments)
+        if verify:
+            verify_bundle(args.directory)
+        else:
+            options = {key: getattr(args, key) for key in ("large_text", "compact", "high_contrast", "landscape", "neutral_title", "paper", "font")}
+            export_bundle(args.input, args.output, presentation=options)
+    except KeyboardInterrupt:
+        print("Bundle operation interrupted. Verify any remaining private bundle before use.", file=sys.stderr)
+        return 130
+    except (PlanError, StorageError) as error:
+        print("Error: " + str(error), file=sys.stderr)
+        return 2
+    print("Bundle integrity verified for all expected files; plan facts remain unverified." if verify else
+          "Private bundle created. Keep every file and printout private; this is not an upload or redaction workflow.")
+    return 0
+
+
 def _print_summary(plan):
     print("SUMMARY: " + json.dumps({
         "contacts": len(plan["contacts"]), "meeting_points": len(plan["meeting_points"]),
@@ -443,20 +485,22 @@ def main(argv=None):
     arguments = list(sys.argv[1:] if argv is None else argv)
     if arguments and arguments[0] == "wizard":
         return _wizard_command(arguments[1:])
+    if arguments and arguments[0] in ("bundle", "verify-bundle"):
+        return _bundle_command(arguments[1:], verify=arguments[0] == "verify-bundle")
     initializing = bool(arguments) and arguments[0] in ("init", "template")
     parser = PrivateArgumentParser(
         allow_abbrev=False,
         description=("Create a private editable JSON draft. Review it before generating a plan." if initializing else
                      "Generate an offline plan locally. Input and HTML contain private data; never commit real plans."),
         epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else
-                "Create a plan: python3 resilience_plan.py wizard --output private-input/household.json. Or start a draft with init (alias: template)."))
+                "Create a plan: python3 resilience_plan.py wizard --output private-input/household.json. Or start a draft with init (alias: template). Use bundle --help or verify-bundle --help for offline exports."))
     parser.add_argument("--schema-version", action="version", version="Schema version 1", help="print the supported input schema and exit")
     parser.add_argument("--quiet", action="store_true", help="suppress routine success messages; errors remain visible")
     if initializing:
         parser.add_argument("--output", default=TEMPLATE_PATH, help="JSON destination within private-input (default: private-input/household.json)")
         parser.add_argument("--force", action="store_true", help="replace only an unchanged template; filled plans and unrelated files remain protected")
     else:
-        parser.add_argument("input", help="local UTF-8 JSON plan (prefix ./ for a file named init or template)")
+        parser.add_argument("input", help="local UTF-8 JSON plan (prefix ./ if its name matches a command)")
         parser.add_argument("--output", help="local HTML destination (default: private-output/emergency-plan.html)")
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
         parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")

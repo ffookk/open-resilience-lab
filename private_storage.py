@@ -86,11 +86,13 @@ def check_private_destination(destination, root_name, suffix=None):
         require_absent(parent, leaf)
 
 
-def write_private_bytes(parent, name, payload):
+def write_private_bytes(parent, name, payload, *, on_create=None):
     """Create and completely write a fixed private file under a held directory."""
     descriptor = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=parent)
     try:
         with os.fdopen(descriptor, "wb") as stream:
+            if on_create is not None:
+                on_create(name, os.fstat(stream.fileno()))
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
@@ -99,12 +101,16 @@ def write_private_bytes(parent, name, payload):
         raise
 
 
-def publish_private_bytes(parent, name, payload):
+def publish_private_bytes(parent, name, payload, *, on_create=None):
     """Publish a complete file with an exclusive hard link, never replacing a file."""
     temporary = ".pending-" + secrets.token_hex(16)
     created = False
     try:
-        write_private_bytes(parent, temporary, payload)
+        def remember(temporary_name, metadata):
+            if on_create is not None:
+                on_create(temporary_name, metadata)
+                on_create(name, metadata)
+        write_private_bytes(parent, temporary, payload, on_create=remember)
         created = True
         os.link(temporary, name, src_dir_fd=parent, dst_dir_fd=parent, follow_symlinks=False)
     finally:
@@ -121,3 +127,41 @@ def save_private_json(document, destination):
         raise
     except (OSError, ValueError, RuntimeError):
         raise StorageError("Unable to save the private plan. No existing output was overwritten.") from None
+
+
+@contextmanager
+def open_directory_no_links(directory):
+    """Open a read-only directory through non-link components; never resolve links."""
+    require_private_storage()
+    descriptors = []
+    try:
+        supplied = Path(directory)
+        if ".." in supplied.parts or "\x00" in str(supplied):
+            raise ValueError
+        absolute = supplied if supplied.is_absolute() else Path.cwd() / supplied
+        descriptor = os.open(absolute.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        descriptors.append(descriptor)
+        for component in absolute.parts[1:]:
+            descriptor = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=descriptor)
+            descriptors.append(descriptor)
+        yield descriptor
+    except StorageError:
+        raise
+    except (OSError, ValueError, RuntimeError):
+        raise StorageError("Unable to inspect the bundle directory safely. Directory links and invalid paths are not accepted.") from None
+    finally:
+        for descriptor in reversed(descriptors):
+            os.close(descriptor)
+
+
+def read_regular_bytes(parent, name, limit):
+    """Read a bounded regular file with exactly one link through an already held directory."""
+    descriptor = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent)
+    with os.fdopen(descriptor, "rb") as stream:
+        metadata = os.fstat(stream.fileno())
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1 or metadata.st_size > limit:
+            raise StorageError("Bundle entries must be bounded regular files without links.")
+        payload = stream.read(limit + 1)
+        if len(payload) > limit:
+            raise StorageError("A bundle file exceeds the inspection size limit.")
+        return payload
