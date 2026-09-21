@@ -176,7 +176,7 @@ def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, o
 <title>''' + escape(plan["title"]) + '''</title>
 <style>
 *{box-sizing:border-box}body{font-family:system-ui,sans-serif;max-width:900px;margin:0 auto;padding:32px;color:#182b36;background:#f5f7f8;line-height:1.6}
-h1{line-height:1.25}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-bottom:5px}h3{margin:0 0 6px}article{background:white;border:1px solid #cbd5d9;border-radius:8px;padding:16px;margin:12px 0;break-inside:avoid}
+h1{line-height:1.25;overflow-wrap:anywhere}h2,h3{overflow-wrap:anywhere}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-bottom:5px}h3{margin:0 0 6px}article{background:white;border:1px solid #cbd5d9;border-radius:8px;padding:16px;margin:12px 0;break-inside:avoid}
 p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px}.notice{border-left:4px solid #59747a;padding:12px;background:#e7eff1}footer{font-size:.9rem;margin-top:32px}
 .skip-link{position:absolute;left:8px;top:-100px;background:#fff;color:#182b36;padding:8px}.skip-link:focus{top:8px}@media print{.skip-link{display:none}}
 nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}nav a{color:inherit;padding:10px 12px;min-height:44px;display:inline-flex;align-items:center}@media print{nav{display:none}}
