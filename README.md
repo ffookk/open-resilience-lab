@@ -7,7 +7,7 @@ Swiss security policy strategy provides the first research leads. Independent co
 
 ## Current status
 
-A Python CLI prototype with no third-party dependencies creates an editable local JSON draft and generates a self-contained HTML household plan.
+A Python CLI prototype with no third-party dependencies creates a reviewed local plan through a guided terminal wizard, creates editable JSON drafts, and generates self-contained HTML household plans.
 The tool makes no network requests and runs no telemetry. Generated pages contain no scripts or external resources; source URLs appear only as text.
 Input validation, HTML escaping, overwrite protection, file permissions, and generation with Python sockets disabled have been checked.
 The earlier bilingual version of the fictional example passed an offline desktop/narrow-viewport check in one Chrome engine and a two-page A4 PDF check; see the [browser check record](docs/browser-check.md). The current English presentation has also passed an offline desktop/narrow-screen layout check in the same Chrome version; its PDF pagination has not been rechecked.
@@ -38,7 +38,15 @@ This mode uses the same input-format validation and prints a fixed result withou
 `--check` cannot be combined with an explicit `--output` or `--force`, and is not accepted by `init` or `template`.
 Passing format validation does not verify household arrangements, source facts, or emergency safety.
 
-To prepare a personal plan, run `init` from the repository root to create a draft in the ignored `private-input/` directory:
+To create a complete plan interactively without editing JSON, use the [guided local wizard](docs/guided-plan.md):
+
+```sh
+python3 resilience_plan.py wizard --output private-input/household.json
+```
+
+The wizard uses hidden terminal prompts, retries invalid entries, and saves only after complete validation and your confirmation. Cancellation or EOF while answering leaves no output. It requires a trusted interactive terminal and POSIX private-storage support; confirmation is not independent review.
+
+To prepare a personal plan manually, run `init` from the repository root to create a draft in the ignored `private-input/` directory:
 
 ```sh
 python3 resilience_plan.py init
@@ -52,7 +60,7 @@ Enter the review date only after reviewing the plan. To try generation and print
 The tool does not detect or verify the other placeholders. The person completing the draft must replace and check each one; passing format validation does not establish that the content has been reviewed.
 
 `template` is an alias for `init`; `python3 resilience_plan.py init --help` displays template command help.
-If an existing JSON input file in the current directory is named `init` or `template`, use
+If an existing JSON input file in the current directory is named `wizard`, use `./wizard`. For files named `init` or `template`, use
 `python3 resilience_plan.py ./init` or `python3 resilience_plan.py ./template` to read it as an input file.
 Use `--output private-input/another-plan.json` to create another draft. The destination must be under
 `private-input/` in the current directory and have a `.json` extension; neither the destination nor its directories may be symbolic links.
