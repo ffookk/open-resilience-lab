@@ -135,6 +135,15 @@ class PlanTests(unittest.TestCase):
                 self.assertEqual(app.main([str(EXAMPLE), "--output", str(output)]), 0)
             self.assertIn("Fictional household example", output.read_text())
 
+    def test_schema_version_needs_no_input_or_output(self):
+        with patch.object(app, "load_plan") as load, patch.object(app, "save_template") as save, contextlib.redirect_stdout(io.StringIO()) as output:
+            with self.assertRaises(SystemExit) as stopped:
+                app.main(["--schema-version"])
+        self.assertEqual(stopped.exception.code, 0)
+        self.assertEqual(output.getvalue(), "Schema version 1\n")
+        load.assert_not_called()
+        save.assert_not_called()
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):

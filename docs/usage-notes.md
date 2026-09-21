@@ -17,3 +17,4 @@
 - `contacts[].contact` is plain text. The tool does not validate phone number formats, make calls, send messages, or confirm contact availability.
 - Date validation checks calendar validity and `YYYY-MM-DD` format, but does not reject future dates. Enter the actual review date.
 - `region` is a text label supplied by the person completing the plan; it is not converted into an administrative code and does not select regional rules.
+- Use `python3 resilience_plan.py --schema-version` to print the supported schema without opening a plan or creating files.
