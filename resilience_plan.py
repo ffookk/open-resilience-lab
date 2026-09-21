@@ -147,7 +147,7 @@ def load_plan(path):
     return validate_plan(plan)
 
 
-def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, omit_notes=False, landscape=False):
+def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, omit_notes=False, landscape=False, neutral_title=False):
     validate_plan(plan)
     presentation_style = []
     if landscape:
@@ -173,7 +173,7 @@ def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, o
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
-<title>''' + escape(plan["title"]) + '''</title>
+<title>''' + ("Household offline plan" if neutral_title else escape(plan["title"])) + '''</title>
 <style>
 *{box-sizing:border-box}body{font-family:system-ui,sans-serif;max-width:900px;margin:0 auto;padding:32px;color:#182b36;background:#f5f7f8;line-height:1.6}
 h1{line-height:1.25;overflow-wrap:anywhere}h2,h3{overflow-wrap:anywhere}h2{margin-top:30px;border-bottom:2px solid #59747a;padding-bottom:5px}h3{margin:0 0 6px}article{background:white;border:1px solid #cbd5d9;border-radius:8px;padding:16px;margin:12px 0;break-inside:avoid}
@@ -315,6 +315,7 @@ def main(argv=None):
         parser.add_argument("--force", action="store_true", help="explicitly replace an existing HTML output; never the input")
         parser.add_argument("--check", action="store_true", help="validate input without rendering or saving HTML; cannot be combined with --output or --force")
         parser.add_argument("--summary", action="store_true", help="print aggregate counts after success, without plan text or paths")
+        parser.add_argument("--neutral-title", action="store_true", help="use a fixed browser-tab title while retaining the visible plan heading")
         parser.add_argument("--landscape", action="store_true", help="request landscape print orientation")
         parser.add_argument("--omit-notes", action="store_true", help="exclude household notes from generated HTML")
         parser.add_argument("--high-contrast", action="store_true", help="use black text and borders on white")
@@ -330,7 +331,7 @@ def main(argv=None):
             return 0
         if args.check and (args.output is not None or args.force):
             raise PlanError("The --check option cannot be combined with --output or --force.")
-        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast, "omit_notes": args.omit_notes, "landscape": args.landscape}
+        presentation = {"large_text": args.large_text, "compact": args.compact, "high_contrast": args.high_contrast, "omit_notes": args.omit_notes, "landscape": args.landscape, "neutral_title": args.neutral_title}
         if args.check and any(presentation.values()):
             raise PlanError("HTML presentation options cannot be combined with --check.")
         plan = load_plan(args.input)

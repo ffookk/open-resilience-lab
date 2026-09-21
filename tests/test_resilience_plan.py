@@ -197,6 +197,12 @@ class PlanTests(unittest.TestCase):
         self.assertIn('<h3 dir="auto">&lt;em&gt;Sample&lt;/em&gt;', document)
         self.assertNotIn("<em>Sample</em>", document)
 
+    def test_neutral_title_changes_only_the_browser_title(self):
+        self.plan["title"] = "PRIVATE_TITLE_MARKER"
+        document = app.render_plan(self.plan, neutral_title=True)
+        self.assertIn("<title>Household offline plan</title>", document)
+        self.assertIn('id="plan-title">PRIVATE_TITLE_MARKER</h1>', document)
+
 
 class CheckTests(unittest.TestCase):
     def setUp(self):
