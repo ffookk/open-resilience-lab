@@ -160,7 +160,7 @@ def render_plan(plan, *, large_text=False, compact=False, high_contrast=False, o
         presentation_style.append('body{font-size:20px}@media print{body{font-size:14pt}}')
     escape = lambda value: html.escape(value, quote=True)
     cards = lambda entries: "".join(
-        '<article><h3>' + escape(title) + '</h3><p>' + escape(body) + '</p></article>'
+        '<article><h3 dir="auto">' + escape(title) + '</h3><p dir="auto">' + escape(body) + '</p></article>'
         for title, body in entries
     )
     contacts = cards((item["name"] + " · " + item["role"], item["contact"]) for item in plan["contacts"])
