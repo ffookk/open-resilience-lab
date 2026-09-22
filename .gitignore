@@ -14,3 +14,6 @@ __pycache__/
 .venv/
 *.log
 !.env.sample
+
+# Pinned development-only browser tools.
+tools/browser/node_modules/

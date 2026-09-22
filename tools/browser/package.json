@@ -1,0 +1,10 @@
+{
+  "name": "resilience-browser-checks",
+  "private": true,
+  "scripts": {
+    "test": "node --test browser.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

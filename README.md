@@ -127,7 +127,7 @@ Functional tests cover malicious HTML escaping, required fields and type/length 
 overwrite and link protection, POSIX permissions, absence of external resource markup, and template creation and CLI generation with Python sockets disabled.
 Template tests also cover the unreviewed date placeholder, generation through the original CLI after editing, overwrite restrictions, parent-directory links, directory boundaries, and argument errors that do not echo supplied values.
 Wizard tests cover hidden-input refusal, validated retries, cancellation, safe saving, and no-clobber behavior. Bundle tests cover complete exports, escaping, bounded integrity checks, malformed or linked files, private permissions, and cleanup after handled failures or interruptions.
-Studio parity and state checks run through Node when it is available on `PATH`; unittest explicitly skips those checks when Node is absent. A skipped test is not JavaScript parity evidence. Normal studio generation and use need only Python and a browser, without Node or package installation.
+Studio parity and state checks run through Node when it is available on `PATH`; unittest explicitly skips those checks when Node is absent. CI installs Node 24 in every Python matrix job so these checks run. A separate Chromium/Firefox suite exercises the Studio and generated pages; see the [browser check guide](docs/browser-check.md). A skipped test is not JavaScript parity evidence. Normal studio generation and use need only Python and a browser, without Node or package installation.
 These checks do not establish the privacy or reliability of browser extensions, operating systems, cloud synchronization, printers, or real disaster use.
 Before contributing, also follow the repository checks in the [privacy guide](docs/privacy.md).
 
@@ -138,7 +138,7 @@ The goal is to help a household find previously agreed emergency contacts and me
 Implemented workflow and remaining goals:
 
 - Implemented: enter contacts, meeting arrangements, and optional support needs in local JSON and generate HTML without external resources.
-- Implemented: English section labels, print styles, narrow-screen CSS, and an entirely fictional example. The earlier bilingual presentation passed one Chrome desktop/narrow-viewport and PDF check; the English presentation has passed a fresh desktop/narrow-screen check, while its PDF pagination, other browsers, and physical printing still need checking.
+- Implemented: English section labels, print styles, narrow-screen CSS, and an entirely fictional example. On 2026-09-22, the unchanged English example was checked in headless Chromium 153 at desktop/narrow viewports and as A4 print PDFs: two full-plan pages and one contact-card page, with every PDF page visually reviewed. Chromium/Firefox automation also covers selected editor and print-media behavior. Physical printing, real-device testing, long-plan pagination, and comprehensive accessibility remain pending; see the [bounded check record](docs/browser-check.md).
 - Implemented: save JSON, edit it, and generate again; output can include sources and review dates supplied by the person completing the plan.
 - Implemented: `init` / `template` creates an unreviewed draft in `private-input/` without modifying the repository example and preserves the original input-file CLI usage.
 - Implemented: guided terminal creation with hidden validated prompts, and private bundles containing full HTML, portable text, contact/meeting cards, and a bounded integrity verifier.

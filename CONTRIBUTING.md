@@ -27,7 +27,7 @@ When changing CLI options, check `--help`, README examples, and default paths to
 
 ## Automated checks
 
-Before committing, read the [privacy guide](docs/privacy.md), run the validation commands in the README, and run `python3 scripts/privacy_check.py --history`. The PR Checks workflow runs privacy checks, unit tests, and documented fictional examples.
+Before committing, read the [privacy guide](docs/privacy.md), run the validation commands in the README, and run `python3 scripts/privacy_check.py --history`. The PR Checks workflow runs privacy checks, a Python/OS unit-test matrix with explicit Node support, documented fictional examples, and Chromium/Firefox regression tests. See the [browser check guide](docs/browser-check.md) for local commands and coverage limits. The required `validate` check succeeds only when the matrix and browser jobs both succeed.
 
 `main` currently requires a PR and a passing `validate` check, including for administrators. Commit on a working branch; force pushes and deletion of the main branch are prohibited. Automated checks do not replace reviews of facts, privacy, or usefulness.
 
