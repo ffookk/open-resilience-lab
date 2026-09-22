@@ -118,6 +118,29 @@ class StudioJavaScriptTests(unittest.TestCase):
         actual = node("return data.map(text => {try {api.importJSON(text); return true;} catch (_) {return false;}});", cases)
         self.assertEqual([i for i, pair in enumerate(zip(actual, expected)) if pair[0] != pair[1]], [])
 
+    def test_ipvfuture_case_follows_generating_parser_without_changing_url_text(self):
+        urls = ["https://[v1.example]", "https://[V1.example]", "https://[V1.example]:443",
+                "https://[V1.example]:65536", "https://[V1.]", "https://[Vg.example]",
+                "https://[v1.example]?q=x", "https://user@[V1.example]"]
+        plans = []
+        for url in urls:
+            plan = fixture()
+            plan["sources"] = [{"title": "Example source", "url": url, "verified_on": "2024-02-29"}]
+            plans.append(plan)
+        original_split = studio.urlsplit
+        for accepts_uppercase in (False, True):
+            with self.subTest(accepts_uppercase=accepts_uppercase):
+                def parser(value):
+                    if value.startswith("https://[V"):
+                        if not accepts_uppercase:
+                            raise ValueError("Uppercase IPvFuture is unsupported by this parser")
+                        value = value.replace("https://[V", "https://[v", 1)
+                    return original_split(value)
+                with patch.object(studio, "urlsplit", side_effect=parser):
+                    actual = node("return data.map(plan => {try {return api.importJSON(JSON.stringify(plan)).sources[0].url;} catch (_) {return null;}});", plans)
+                self.assertEqual(actual, [urls[0], urls[1] if accepts_uppercase else None,
+                                         urls[2] if accepts_uppercase else None, None, None, None, None, None])
+
     def test_strict_json_rejects_duplicates_lexical_float_versions_and_syntax(self):
         valid = json.dumps(fixture())
         invalid = [valid.replace('"schema_version": 1', '"schema_version": 1, "schema_version": 1'),

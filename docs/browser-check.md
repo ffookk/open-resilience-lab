@@ -29,8 +29,9 @@ npm test
 
 Linux runners install browser system libraries with
 `npx --no-install playwright install --with-deps chromium firefox`.
-`PYTHON` may select a different Python executable. Browser binaries and pinned
-Playwright packages are development tools; generating or using a plan still
+The suite calls `python3` and receives fictional fixture documents on standard
+output; it writes only fixed filenames in its owned temporary directory.
+Browser binaries and pinned Playwright packages are development tools; generating or using a plan still
 requires no Node installation or third-party Python runtime package.
 
 CI also runs the Python suite on Ubuntu with Python 3.10 through 3.14 and on

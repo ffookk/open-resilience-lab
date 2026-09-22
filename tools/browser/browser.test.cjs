@@ -36,8 +36,11 @@ for (const [name, engine] of Object.entries({ chromium, firefox })) {
     const directory = await fs.mkdtemp(path.join(output, 'browser-'));
     let browser;
     try {
-      execFileSync(process.env.PYTHON || 'python3', [path.join(__dirname, 'generate_fixtures.py'), directory],
-        { cwd: root, timeout: 15000, stdio: 'pipe' });
+      const documents = JSON.parse(execFileSync('python3', [path.join(__dirname, 'generate_fixtures.py')],
+        { cwd: root, timeout: 15000, encoding: 'utf8', stdio: 'pipe' }));
+      for (const filename of ['fixture.json', 'studio.html', 'plan.html', 'cards.html']) {
+        await fs.writeFile(path.join(directory, filename), documents[filename], { flag: 'wx', mode: 0o600 });
+      }
       const fixture = JSON.parse(await fs.readFile(path.join(directory, 'fixture.json'), 'utf8'));
       browser = await engine.launch({ headless: true });
       const context = await browser.newContext({ offline: true, acceptDownloads: true,
