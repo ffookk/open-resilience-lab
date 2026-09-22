@@ -28,9 +28,14 @@ def studio_policy():
         strict_brackets = False
     except ValueError:
         strict_brackets = True
+    try:
+        urlsplit("https://[V1.example]").port
+        uppercase_ipvfuture = True
+    except ValueError:
+        uppercase_ipvfuture = False
     return {"max_bytes": MAX_INPUT_BYTES, "limits": {"title": 120, "region": 120, "notes": 4000},
             "whitespace": [code for code in range(0x3001) if chr(code).isspace()],
-            "strict_brackets": strict_brackets, "export_css": EXPORT_CSS,
+            "strict_brackets": strict_brackets, "uppercase_ipvfuture": uppercase_ipvfuture, "export_css": EXPORT_CSS,
             "export_csp": "default-src 'none'; script-src 'none'; style-src 'sha256-" + digest(EXPORT_CSS)
             + "'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"}
 

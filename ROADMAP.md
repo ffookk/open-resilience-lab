@@ -19,7 +19,7 @@ Acceptance: every specific policy or preparedness requirement can be traced to i
 - [x] Add local `init` / `template` commands with an unreviewed date placeholder, private file permissions, default overwrite refusal, replacement only of an unchanged draft, and preservation of the original generation command.
 - [x] Check the earlier bilingual fictional example offline in one Chrome engine at desktop/narrow viewports and as A4 PDF; see the [check record](docs/browser-check.md).
 - [x] Recheck the English fictional presentation at desktop and narrow viewports in one offline Chrome context.
-- [ ] Recheck PDF pagination for the English presentation.
+- [x] Recheck the unchanged English fictional full plan and contact cards as headless Chromium 153 A4 print PDFs on 2026-09-22: two plan pages and one card page, all visually reviewed.
 - [ ] Complete browser viewing with a real network disconnection, long-plan pagination, and physical printing checks.
 - [x] Add a guided local terminal wizard with validated retries, optional fields, hidden prompts, cancellation, and exclusive private saving.
 - [x] Export full HTML, portable text, and compact contact/meeting cards into a new private directory with a last-published integrity manifest and bounded verification.
@@ -27,14 +27,15 @@ Acceptance: every specific policy or preparedness requirement can be traced to i
 - [ ] Import arbitrary plan HTML.
 
 Current evidence: automated CLI tests, strict validation, HTML escaping, restricted file permissions, overwrite protection, absence-of-external-resources checks,
-and a historical desktop/narrow-viewport and two-page A4 PDF record in one offline Chrome context.
+Chromium/Firefox editor and print-media regressions, and a 2026-09-22 desktop/narrow-viewport and A4 PDF review of the unchanged English fictional example in headless Chromium 153.
 Output shows the region, review date, and sources supplied by the person completing the plan. Regional rules and real household outcomes remain unverified.
 Full acceptance still requires viewing and printing in a genuinely disconnected environment, with pagination, accessibility, and usage feedback recorded.
 
 ## PR 3: verify usefulness
 
 - [ ] Record target users' task completion time, omissions, and comprehension difficulties.
-- [ ] Check keyboard operation, print output, and basic accessibility.
+- [x] Add automated Chromium/Firefox keyboard editing, export, and print-media checks using fictional inputs.
+- [ ] Check keyboard operation on real devices, physical print output, screen readers, and comprehensive manual accessibility.
 - [ ] Revise the prototype based on observations and document limitations.
 
 Acceptance: provide at least a reproducible usage scenario and before/after results. Completing a demonstration does not establish real disaster readiness or professional emergency certification.

@@ -94,7 +94,8 @@
       host = bracket[2];
       const suffix = bracket[3], colon = suffix.indexOf(":");
       port = colon < 0 ? "" : suffix.slice(colon + 1);
-      if (!(host.startsWith("v") ? /^v[0-9a-fA-F]+\..+$/.test(host) : ipv6(host))) return false;
+      const future = host.startsWith("v") || policy.uppercase_ipvfuture && host.startsWith("V");
+      if (!(future ? /^[vV][0-9a-fA-F]+\..+$/.test(host) : ipv6(host))) return false;
     } else {
       const colon = authority.indexOf(":");
       host = colon < 0 ? authority : authority.slice(0, colon);
