@@ -10,6 +10,13 @@ first-error focus through collapsed fields, JSON import/export, explicit save
 confirmation, invalid-import and cancelled-reset preservation, and HTML/card
 downloads. Preview filters and display preferences must leave exports complete.
 
+It also generates a fictional revision review with one added household entry and
+one changed notes field containing literal hostile markup. Both engines check
+the record summary, before/after value fidelity, inert markup, empty browser
+storage, absence of scripts or external resources, and no horizontal overflow
+at 1280- and 360-pixel widths. Emulated print media keeps the change records and
+hides the skip link. These assertions do not establish review PDF pagination.
+
 The suite checks multiline text in Python-generated and Studio-exported pages
 under screen and emulated print media. It checks that Studio editor controls and
 the JSON inspector are hidden for printing, and that a narrow Studio viewport has
