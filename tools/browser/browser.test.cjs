@@ -38,7 +38,7 @@ for (const [name, engine] of Object.entries({ chromium, firefox })) {
     try {
       const documents = JSON.parse(execFileSync('python3', [path.join(__dirname, 'generate_fixtures.py')],
         { cwd: root, timeout: 15000, encoding: 'utf8', stdio: 'pipe' }));
-      for (const filename of ['fixture.json', 'studio.html', 'plan.html', 'cards.html', 'review.html', 'comparison.json']) {
+      for (const filename of ['fixture.json', 'studio.html', 'plan.html', 'cards.html', 'review.html', 'comparison.json', 'long-review.html', 'long-comparison.json']) {
         await fs.writeFile(path.join(directory, filename), documents[filename], { flag: 'wx', mode: 0o600 });
       }
       const fixture = JSON.parse(await fs.readFile(path.join(directory, 'fixture.json'), 'utf8'));
@@ -186,6 +186,45 @@ for (const [name, engine] of Object.entries({ chromium, firefox })) {
       await rendered.emulateMedia({ media: 'print' });
       assert.equal(await rendered.locator('.skip-link').isVisible(), false);
       assert.equal(await rendered.locator('#changes article').count(), comparison.summary.total);
+      // A keyboard-focused multi-page review must not print its screen outline.
+      await rendered.emulateMedia({ media: 'screen' });
+      await rendered.goto(pathToFileURL(path.join(directory, 'long-review.html')).href);
+      const longComparison = JSON.parse(documents['long-comparison.json']);
+      assert.equal(longComparison.changes.length, 1);
+      assert.equal(await rendered.getByRole('main').count(), 1);
+      assert.equal(await rendered.getByRole('heading', { level: 1 }).count(), 1);
+      assert.equal(await rendered.getByRole('table', { name: 'Change records by plan section' }).count(), 1);
+      assert.equal(await rendered.getByRole('article', { name: 'Changed: /notes' }).count(), 1);
+      assert.equal(await rendered.getByRole('region', { name: 'Before value', exact: true }).count(), 1);
+      assert.equal(await rendered.getByRole('region', { name: 'After value', exact: true }).count(), 1);
+      assert.equal(await rendered.locator('[id]').evaluateAll(elements =>
+        new Set(elements.map(element => element.id)).size === elements.length), true);
+      await rendered.keyboard.press('Tab');
+      assert.equal(await rendered.locator('.skip-link').evaluate(element => element === document.activeElement), true);
+      await rendered.keyboard.press('Enter');
+      assert.equal(await rendered.locator('#changes').evaluate(element => element === document.activeElement), true);
+      assert.notEqual(await rendered.locator('#changes').evaluate(element => getComputedStyle(element).outlineStyle), 'none');
+      for (const width of [1280, 360, 320]) {
+        await rendered.setViewportSize({ width, height: 800 });
+        assert.equal(await rendered.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      }
+      for (const media of ['screen', 'print']) {
+        await rendered.emulateMedia({ media });
+        const values = rendered.locator('#changes article pre');
+        assert.equal(await values.count(), 2);
+        for (const [index, side] of ['before', 'after'].entries()) {
+          const text = await values.nth(index).textContent();
+          assert.equal(text, longComparison.changes[0][side]);
+          assert.equal(text.split('\n').length, 241);
+          assert.equal(await values.nth(index).evaluate(element => getComputedStyle(element).whiteSpace), 'pre-wrap');
+        }
+        assert.equal(await rendered.locator('script, img, iframe, link[href], source, form, svg').count(), 0);
+        assert.deepEqual(await rendered.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0]);
+      }
+      assert.equal(await rendered.locator('#changes').evaluate(element => getComputedStyle(element).outlineStyle), 'none');
+      await rendered.emulateMedia({ media: 'screen', forcedColors: 'active' });
+      assert.notEqual(await rendered.locator('#changes').evaluate(element => getComputedStyle(element).outlineStyle), 'none');
+      assert.equal(await rendered.evaluate(() => matchMedia('(forced-colors: active)').matches), true);
       assert.deepEqual(external, [], 'No external page requests are permitted');
       assert.deepEqual(errors, [], 'Generated pages must not raise JavaScript errors');
       await context.close();
