@@ -11,7 +11,7 @@ A Python CLI prototype with no third-party dependencies creates a blank offline 
 The tool makes no network requests and runs no telemetry. Printable plan pages contain no scripts or external resources. The optional studio uses fixed local JavaScript for editing; it has no network requests, browser storage, or external assets. Source URLs appear only as text.
 Input validation, HTML escaping, overwrite protection, file permissions, and generation with Python sockets disabled have been checked.
 The current English fictional plan and cards have a bounded desktop/narrow-viewport and A4 PDF check record; selected editor, generated-page, and revision-review behavior is covered by Chromium/Firefox automation. See the [browser check record](docs/browser-check.md) for exact samples and limits.
-Physical mobile devices, screen readers, physical printing, long-plan and revision-review PDF pagination, and real household trials remain unverified. Regional policy requirements have not been verified either.
+Physical mobile devices, screen readers, physical printing, pagination beyond the recorded fictional samples, and real household trials remain unverified. Regional policy requirements have not been verified either.
 
 ## Run locally
 

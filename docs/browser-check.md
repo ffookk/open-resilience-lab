@@ -15,7 +15,13 @@ one changed notes field containing literal hostile markup. Both engines check
 the record summary, before/after value fidelity, inert markup, empty browser
 storage, absence of scripts or external resources, and no horizontal overflow
 at 1280- and 360-pixel widths. Emulated print media keeps the change records and
-hides the skip link. These assertions do not establish review PDF pagination.
+hides the skip link. A separate long fictional notes comparison checks all 241
+lines per side (240 numbered lines plus an unbroken trailing string), widths
+1280/360/320, keyboard activation of the skip link, main focus, unique IDs,
+article/region names, and table/heading semantics. Keyboard focus remains visible
+on screen, including emulated forced colors, and its outline is suppressed only
+for print. These automation checks do not establish screen-reader usability or
+review PDF pagination; the bounded PDF observation below is separate.
 
 The suite checks multiline text in Python-generated and Studio-exported pages
 under screen and emulated print media. It checks that Studio editor controls and
@@ -51,6 +57,34 @@ These automated assertions do not establish physical printing, PDF pagination,
 screen-reader usability, manual accessibility review, real household outcomes,
 or a network audit of the entire browser process. Historical observations below
 remain limited to their stated samples and dates.
+
+## 2026-09-26: long revision report and keyboard-to-print regression
+
+A fictional notes-only revision with 240 numbered before lines and 240 numbered
+after lines was rendered in headless Chromium 153.0.8010.12 with Playwright
+1.63.0 and Node 24. The notes were within the existing 4000-character field
+limit. The browser activated **Skip to changes** with Tab and Enter before
+switching to print media, then generated A4 PDFs with browser headers/footers
+disabled. No real household information was used.
+
+Before the repair, the main region's visible keyboard focus outline also
+printed. On continuation pages the fragmented 3-pixel outline crossed the top
+line of text. Both Chromium and Firefox regression checks failed because the
+focused main element still had a solid outline under print media. The repair
+suppresses that outline only for print; it leaves screen keyboard focus intact.
+
+After the repair, the fictional A4 PDF still had eight pages and all 480 unique
+line markers extracted exactly once. Every page was rasterized and inspected;
+the heavy continuation-page rules were absent, with no observed text clipping,
+overlap, or missing line markers in this sample. The long browser fixture also
+passed keyboard, semantic, narrow-layout, and screen/print content-preservation
+checks in Chromium and Firefox 155.0. External page requests were blocked and
+none were observed. Generated PDFs, images, and test artifacts stayed local.
+
+This is one synthetic long-notes case, not a guarantee for every possible field
+combination, paper size, or browser. Firefox PDF pagination, physical printing,
+real-device behavior, screen readers, comprehensive manual accessibility, and
+real household review remain unverified.
 
 ## 2026-09-22: English fictional plan and card PDFs
 

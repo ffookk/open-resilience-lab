@@ -131,7 +131,7 @@ h3,h4{margin:0 0 8px}article{break-inside:avoid}p,pre,code,dt,dd{overflow-wrap:a
 table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:6px;border-bottom:1px solid #cbd5d9}dt{font-weight:bold}dd{margin-left:0}
 .skip-link{position:absolute;top:-100px}.skip-link:focus{top:8px;background:white;color:#182b36;padding:8px}:focus-visible{outline:3px solid currentColor;outline-offset:3px}
 @media(max-width:640px){body{padding:12px}.values,.snapshots{grid-template-columns:1fr}h1{font-size:1.7rem}}
-@media print{@page{margin:15mm}body{padding:0;background:white;font-size:10pt;max-width:none}.skip-link{display:none}pre,p{orphans:3;widows:3}}
+@media print{@page{margin:15mm}body{padding:0;background:white;font-size:10pt;max-width:none}.skip-link{display:none}:focus-visible{outline:none}pre,p{orphans:3;widows:3}}
 @media(forced-colors:active){body,article,.notice,.snapshots{color:CanvasText;background:Canvas}article,.notice,.snapshots,th,td{border-color:CanvasText}}
 </style></head><body><a class="skip-link" href="#changes">Skip to changes</a>
 <header><h1>Private plan revision review</h1><p>Comparison format 1 · Plan schema 1</p></header>

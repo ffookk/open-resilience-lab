@@ -31,8 +31,10 @@ Open `review.html` in the new directory locally. The directory contains exactly:
 
 The HTML uses no JavaScript, browser storage, external assets, or active source
 links. Source URLs are plain text. Use the browser Print menu and check pagination
-before printing. Long-plan pagination, physical printing, real-device behavior,
-and comprehensive accessibility remain unverified for this report.
+before printing. One long fictional A4 report has a bounded
+[PDF and keyboard-to-print check record](browser-check.md#2026-09-26-long-revision-report-and-keyboard-to-print-regression).
+Other long-plan field combinations, Firefox PDF pagination, physical printing,
+real-device behavior, and comprehensive accessibility remain unverified.
 
 Both commands work offline using Python's standard library. Creation needs POSIX
 private-storage support, as does the existing private-bundle workflow. New
