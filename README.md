@@ -7,11 +7,11 @@ Swiss security policy strategy provides the first research leads. Independent co
 
 ## Current status
 
-A Python CLI prototype with no third-party dependencies creates a blank offline graphical plan studio, creates a reviewed local plan through a guided terminal wizard, creates editable JSON drafts, generates self-contained HTML household plans, and exports private offline bundles with printable cards and an integrity check.
+A Python CLI prototype with no third-party dependencies creates a blank offline graphical plan studio, creates a reviewed local plan through a guided terminal wizard, creates editable JSON drafts, generates self-contained HTML household plans, exports private offline bundles with printable cards and an integrity check, and compares saved revisions in private JSON and HTML reports.
 The tool makes no network requests and runs no telemetry. Printable plan pages contain no scripts or external resources. The optional studio uses fixed local JavaScript for editing; it has no network requests, browser storage, or external assets. Source URLs appear only as text.
 Input validation, HTML escaping, overwrite protection, file permissions, and generation with Python sockets disabled have been checked.
-The earlier bilingual version of the fictional example passed an offline desktop/narrow-viewport check in one Chrome engine and a two-page A4 PDF check; see the [browser check record](docs/browser-check.md). The current English presentation has also passed an offline desktop/narrow-screen layout check in the same Chrome version; its PDF pagination has not been rechecked.
-Cross-browser use, physical mobile devices, screen readers, physical printing, and real household trials remain unverified. Regional policy requirements have not been verified either.
+The current English fictional plan and cards have a bounded desktop/narrow-viewport and A4 PDF check record; selected editor, generated-page, and revision-review behavior is covered by Chromium/Firefox automation. See the [browser check record](docs/browser-check.md) for exact samples and limits.
+Physical mobile devices, screen readers, physical printing, long-plan and revision-review PDF pagination, and real household trials remain unverified. Regional policy requirements have not been verified either.
 
 ## Run locally
 
@@ -65,6 +65,15 @@ python3 resilience_plan.py verify-bundle private-output/example-bundle
 
 Open `plan.html` or `cards.html` inside the new directory locally. The fourth file, `manifest.json`, records byte counts and SHA-256 digests; verification detects missing, changed, malformed, or unexpected files. It does not establish authorship, factual accuracy, or confidentiality. All bundle files and printouts may contain private data. This workflow performs no upload, encryption, or automatic redaction.
 
+To review differences between two saved plans, create a [private revision review](docs/plan-revisions.md):
+
+```sh
+python3 resilience_plan.py compare private-input/before.json private-input/after.json --output private-output/revision-01
+python3 resilience_plan.py verify-review private-input/before.json private-input/after.json private-output/revision-01
+```
+
+The new directory contains deterministic `comparison.json`, a self-contained `review.html`, and an integrity manifest. Reports show added, removed, and changed values, section counts, and canonical input fingerprints. Lists are compared by ordered position; names and duplicate entries are never guessed as identities. Reports retain removed private values. Neither input is changed, and no household review or source verification is performed. The verifier checks all three artifacts against both inputs without writing output. Existing destinations are never overwritten.
+
 To prepare a personal plan manually, run `init` from the repository root to create a draft in the ignored `private-input/` directory:
 
 ```sh
@@ -79,7 +88,7 @@ Enter the review date only after reviewing the plan. To try generation and print
 The tool does not detect or verify the other placeholders. The person completing the draft must replace and check each one; passing format validation does not establish that the content has been reviewed.
 
 `template` is an alias for `init`; `python3 resilience_plan.py init --help` displays template command help.
-For JSON input files named `studio`, `wizard`, `bundle`, or `verify-bundle`, prefix the filename with `./`. For files named `init` or `template`, use
+For JSON input files named `studio`, `wizard`, `bundle`, `verify-bundle`, `compare`, or `verify-review`, prefix the filename with `./`. For files named `init` or `template`, use
 `python3 resilience_plan.py ./init` or `python3 resilience_plan.py ./template` to read it as an input file.
 Use `--output private-input/another-plan.json` to create another draft. The destination must be under
 `private-input/` in the current directory and have a `.json` extension; neither the destination nor its directories may be symbolic links.
@@ -127,6 +136,7 @@ Functional tests cover malicious HTML escaping, required fields and type/length 
 overwrite and link protection, POSIX permissions, absence of external resource markup, and template creation and CLI generation with Python sockets disabled.
 Template tests also cover the unreviewed date placeholder, generation through the original CLI after editing, overwrite restrictions, parent-directory links, directory boundaries, and argument errors that do not echo supplied values.
 Wizard tests cover hidden-input refusal, validated retries, cancellation, safe saving, and no-clobber behavior. Bundle tests cover complete exports, escaping, bounded integrity checks, malformed or linked files, private permissions, and cleanup after handled failures or interruptions.
+Revision tests cover canonical fingerprints, ordered/duplicate list semantics, nested additions/removals, safe literal rendering, private no-clobber exports, tamper detection, and bounded CLI diagnostics including direct script execution.
 Studio parity and state checks run through Node when it is available on `PATH`; unittest explicitly skips those checks when Node is absent. CI installs Node 24 in every Python matrix job so these checks run. A separate Chromium/Firefox suite exercises the Studio and generated pages; see the [browser check guide](docs/browser-check.md). A skipped test is not JavaScript parity evidence. Normal studio generation and use need only Python and a browser, without Node or package installation.
 These checks do not establish the privacy or reliability of browser extensions, operating systems, cloud synchronization, printers, or real disaster use.
 Before contributing, also follow the repository checks in the [privacy guide](docs/privacy.md).
@@ -143,6 +153,7 @@ Implemented workflow and remaining goals:
 - Implemented: `init` / `template` creates an unreviewed draft in `private-input/` without modifying the repository example and preserves the original input-file CLI usage.
 - Implemented: guided terminal creation with hidden validated prompts, and private bundles containing full HTML, portable text, contact/meeting cards, and a bounded integrity verifier.
 - Implemented: a blank offline graphical studio with all schema-v1 fields, local JSON round trips, validation, reorderable lists, a live preview, and explicit JSON/printable downloads.
+- Implemented: deterministic private revision reports with positional comparisons, canonical fingerprints, and read-only verification against both original plans.
 - Planned: importing plan HTML, regional official-source verification, and real usage feedback.
 
 The current format is JSON schema version 1, implemented with Python's standard library. Initial regional sources have not yet been selected or verified.

@@ -99,6 +99,22 @@ def create_bundle(plan, destination, *, html_renderer, presentation=None):
     manifest = {"bundle_format": 1, "schema_version": 1, "files": {
         name: {"sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload)} for name, payload in payloads.items()}}
     manifest_bytes = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    create_private_artifact_directory(payloads, manifest_bytes, destination)
+    return manifest
+
+
+def create_private_artifact_directory(payloads, manifest_bytes, destination):
+    """Write trusted generated files in a new private directory, manifest last.
+
+    Bundle and comparison exports share the same no-follow/no-clobber
+    transaction. The manifest is the completion marker, not a signature.
+    """
+    if (not payloads or "manifest.json" in payloads
+            or any(not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9.-]{0,63}", name)
+                   or not isinstance(payload, bytes) or len(payload) > MAX_BUNDLE_FILE_BYTES
+                   for name, payload in payloads.items())
+            or not isinstance(manifest_bytes, bytes) or len(manifest_bytes) > MAX_MANIFEST_BYTES):
+        raise StorageError("The generated private export has unsupported files or exceeds its size limit.")
     try:
         with private_parent(destination, "private-output", create=True) as (parent, leaf):
             require_absent(parent, leaf)
@@ -114,7 +130,7 @@ def create_bundle(plan, destination, *, html_renderer, presentation=None):
                 opened = os.fstat(descriptor)
                 if (opened.st_dev, opened.st_ino) != (owned.st_dev, owned.st_ino):
                     raise StorageError("The new bundle directory changed during creation.")
-                for name in PAYLOAD_NAMES:
+                for name in payloads:
                     write_private_bytes(descriptor, name, payloads[name], on_create=remember)
                 publish_private_bytes(descriptor, "manifest.json", manifest_bytes, on_create=remember)
                 complete = True
@@ -139,8 +155,7 @@ def create_bundle(plan, destination, *, html_renderer, presentation=None):
     except StorageError:
         raise
     except (OSError, ValueError, RuntimeError):
-        raise StorageError("Bundle creation failed. Check for incomplete private output locally; existing destinations were not overwritten.") from None
-    return manifest
+        raise StorageError("Private export creation failed. Check for incomplete output locally; existing destinations were not overwritten.") from None
 
 
 def _manifest_object(pairs):

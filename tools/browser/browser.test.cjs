@@ -38,7 +38,7 @@ for (const [name, engine] of Object.entries({ chromium, firefox })) {
     try {
       const documents = JSON.parse(execFileSync('python3', [path.join(__dirname, 'generate_fixtures.py')],
         { cwd: root, timeout: 15000, encoding: 'utf8', stdio: 'pipe' }));
-      for (const filename of ['fixture.json', 'studio.html', 'plan.html', 'cards.html']) {
+      for (const filename of ['fixture.json', 'studio.html', 'plan.html', 'cards.html', 'review.html', 'comparison.json']) {
         await fs.writeFile(path.join(directory, filename), documents[filename], { flag: 'wx', mode: 0o600 });
       }
       const fixture = JSON.parse(await fs.readFile(path.join(directory, 'fixture.json'), 'utf8'));
@@ -151,6 +151,41 @@ for (const [name, engine] of Object.entries({ chromium, firefox })) {
           assert.equal(await rendered.locator('html').getAttribute('lang'), 'en');
         }
       }
+      const comparison = JSON.parse(documents['comparison.json']);
+      await rendered.emulateMedia({ media: 'screen' });
+      await rendered.goto(pathToFileURL(path.join(directory, 'review.html')).href);
+      assert.equal(await rendered.locator('#changes article').count(), comparison.summary.total);
+      assert.equal(comparison.summary.added, 1);
+      assert.equal(comparison.summary.changed, 1);
+      for (const [index, change] of comparison.changes.entries()) {
+        const item = rendered.locator('#changes article').nth(index);
+        assert.equal(await item.locator('h3 code').textContent(), change.path);
+        for (const side of ['before', 'after']) {
+          const cell = item.locator(`section[aria-label="${side === 'before' ? 'Before' : 'After'} value"]`);
+          if (Object.hasOwn(change, side)) {
+            if (typeof change[side] === 'string') {
+              assert.equal(await cell.locator('pre').textContent(), change[side]);
+            } else {
+              assert.deepEqual(JSON.parse(await cell.locator('pre').textContent()), change[side]);
+            }
+          } else {
+            assert.equal(await cell.locator('.absent').textContent(), 'Not present');
+          }
+        }
+      }
+      assert.equal(await rendered.locator('script, img, iframe, link[href], source, form, svg').count(), 0);
+      assert.equal(await rendered.evaluate(() => window.reviewInjected), undefined);
+      assert.deepEqual(await rendered.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0]);
+      assert.equal(await rendered.locator('html').getAttribute('lang'), 'en');
+      assert.ok((await rendered.locator('body').innerText()).includes('zero-based position'));
+      assert.ok((await rendered.locator('body').innerText()).includes('No date or arrangement is updated.'));
+      for (const width of [1280, 360]) {
+        await rendered.setViewportSize({ width, height: 800 });
+        assert.equal(await rendered.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      }
+      await rendered.emulateMedia({ media: 'print' });
+      assert.equal(await rendered.locator('.skip-link').isVisible(), false);
+      assert.equal(await rendered.locator('#changes article').count(), comparison.summary.total);
       assert.deepEqual(external, [], 'No external page requests are permitted');
       assert.deepEqual(errors, [], 'Generated pages must not raise JavaScript errors');
       await context.close();

@@ -511,6 +511,36 @@ def _studio_command(arguments):
     return 0
 
 
+def _review_command(arguments, *, verify=False):
+    from plan_review import PlanError as ReviewInputError, create_review, verify_review
+    from private_storage import StorageError
+    parser = PrivateArgumentParser(prog="resilience-plan " + ("verify-review" if verify else "compare"),
+                                   allow_abbrev=False,
+                                   description="Compare two local plans by ordered position. No upload, automatic matching, or household review confirmation.")
+    parser.add_argument("before", help="local schema-v1 JSON plan before the revision")
+    parser.add_argument("after", help="local schema-v1 JSON plan after the revision")
+    if verify:
+        parser.add_argument("directory", help="existing local review directory to verify against both inputs")
+    else:
+        parser.add_argument("--output", required=True, help="new directory under private-output; never overwrite an existing review")
+    try:
+        args = parser.parse_args(arguments)
+        if verify:
+            verify_review(args.before, args.after, args.directory)
+        else:
+            create_review(args.before, args.after, args.output)
+    except KeyboardInterrupt:
+        print("Review operation interrupted. Verify any remaining private review before use.", file=sys.stderr)
+        return 130
+    # Direct script execution and module imports have distinct PlanError classes.
+    except (PlanError, ReviewInputError, StorageError) as error:
+        print("Error: " + str(error), file=sys.stderr)
+        return 2
+    print("Review matches both input plans and the supported format; household facts remain unverified." if verify else
+          "Private revision review created. Keep all reports private; no household review or source verification was performed.")
+    return 0
+
+
 def _print_summary(plan):
     print("SUMMARY: " + json.dumps({
         "contacts": len(plan["contacts"]), "meeting_points": len(plan["meeting_points"]),
@@ -520,6 +550,8 @@ def _print_summary(plan):
 
 def main(argv=None):
     arguments = list(sys.argv[1:] if argv is None else argv)
+    if arguments and arguments[0] in ("compare", "verify-review"):
+        return _review_command(arguments[1:], verify=arguments[0] == "verify-review")
     if arguments and arguments[0] == "studio":
         return _studio_command(arguments[1:])
     if arguments and arguments[0] == "wizard":
@@ -532,7 +564,7 @@ def main(argv=None):
         description=("Create a private editable JSON draft. Review it before generating a plan." if initializing else
                      "Generate an offline plan locally. Input and HTML contain private data; never commit real plans."),
         epilog=("Example: python3 resilience_plan.py init --output private-input/household.json" if initializing else
-                "Create a plan: python3 resilience_plan.py wizard --output private-input/household.json. Or start a draft with init (alias: template). Use studio --help for the graphical editor, or bundle --help and verify-bundle --help for offline exports."))
+                "Create a plan: python3 resilience_plan.py wizard --output private-input/household.json. Or start a draft with init (alias: template). Use studio --help for the graphical editor, bundle --help and verify-bundle --help for offline exports, or compare --help and verify-review --help for revision reviews."))
     parser.add_argument("--schema-version", action="version", version="Schema version 1", help="print the supported input schema and exit")
     parser.add_argument("--quiet", action="store_true", help="suppress routine success messages; errors remain visible")
     if initializing:
