@@ -74,6 +74,14 @@ python3 resilience_plan.py verify-review private-input/before.json private-input
 
 The new directory contains deterministic `comparison.json`, a self-contained `review.html`, and an integrity manifest. Reports show added, removed, and changed values, section counts, and canonical input fingerprints. Lists are compared by ordered position; names and duplicate entries are never guessed as identities. Reports retain removed private values. Neither input is changed, and no household review or source verification is performed. The verifier checks all three artifacts against both inputs without writing output. Existing destinations are never overwritten.
 
+To retain only change counts, explicitly choose a [private revision summary](docs/revision-summaries.md):
+
+```sh
+python3 resilience_plan.py summarize-revision private-input/before.json private-input/after.json --output private-output/revision-counts.json
+```
+
+This writes one private JSON file containing only fixed format labels and section/operation counts. It omits old/new values, dates, filenames, individual paths, entry counts, and fingerprints. Different plan pairs with the same change pattern produce the same summary. Counts can still disclose information; this is not anonymization or an automatic public-sharing workflow. Without `--output`, the new-file destination is `private-output/revision-summary.json`.
+
 To prepare a personal plan manually, run `init` from the repository root to create a draft in the ignored `private-input/` directory:
 
 ```sh
@@ -88,7 +96,7 @@ Enter the review date only after reviewing the plan. To try generation and print
 The tool does not detect or verify the other placeholders. The person completing the draft must replace and check each one; passing format validation does not establish that the content has been reviewed.
 
 `template` is an alias for `init`; `python3 resilience_plan.py init --help` displays template command help.
-For JSON input files named `studio`, `wizard`, `bundle`, `verify-bundle`, `compare`, or `verify-review`, prefix the filename with `./`. For files named `init` or `template`, use
+For JSON input files named `studio`, `wizard`, `bundle`, `verify-bundle`, `compare`, `verify-review`, or `summarize-revision`, prefix the filename with `./`. For files named `init` or `template`, use
 `python3 resilience_plan.py ./init` or `python3 resilience_plan.py ./template` to read it as an input file.
 Use `--output private-input/another-plan.json` to create another draft. The destination must be under
 `private-input/` in the current directory and have a `.json` extension; neither the destination nor its directories may be symbolic links.
@@ -136,6 +144,7 @@ Functional tests cover malicious HTML escaping, required fields and type/length 
 overwrite and link protection, POSIX permissions, absence of external resource markup, and template creation and CLI generation with Python sockets disabled.
 Template tests also cover the unreviewed date placeholder, generation through the original CLI after editing, overwrite restrictions, parent-directory links, directory boundaries, and argument errors that do not echo supplied values.
 Wizard tests cover hidden-input refusal, validated retries, cancellation, safe saving, and no-clobber behavior. Bundle tests cover complete exports, escaping, bounded integrity checks, malformed or linked files, private permissions, and cleanup after handled failures or interruptions.
+Revision-summary tests check a strict output allowlist, absence of fictional canaries and fingerprints, matching count patterns across different plans, count reconciliation with full reviews, private atomic publication, and direct-script error handling.
 Revision tests cover canonical fingerprints, ordered/duplicate list semantics, nested additions/removals, safe literal rendering, private no-clobber exports, tamper detection, and bounded CLI diagnostics including direct script execution.
 Studio parity and state checks run through Node when it is available on `PATH`; unittest explicitly skips those checks when Node is absent. CI installs Node 24 in every Python matrix job so these checks run. A separate Chromium/Firefox suite exercises the Studio and generated pages; see the [browser check guide](docs/browser-check.md). A skipped test is not JavaScript parity evidence. Normal studio generation and use need only Python and a browser, without Node or package installation.
 These checks do not establish the privacy or reliability of browser extensions, operating systems, cloud synchronization, printers, or real disaster use.

@@ -4,6 +4,9 @@ Compare two schema-version-1 JSON plans locally before deciding what to review
 with a household. The report shows added, removed, and changed content, including
 old contact details or support needs that no longer appear in the revised plan.
 All reports are private artifacts, not suitable for a public issue or PR.
+If you need only section and operation counts, explicitly use
+[`summarize-revision`](revision-summaries.md) to avoid retaining values and
+fingerprints in the output. Aggregate counts still require private storage.
 
 ## Create and inspect a comparison
 

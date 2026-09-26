@@ -10,10 +10,13 @@ import os
 
 from bundle_export import (MAX_BUNDLE_FILE_BYTES, MAX_MANIFEST_BYTES,
                            create_private_artifact_directory)
-from private_storage import StorageError, open_directory_no_links, read_regular_bytes
+from private_storage import (StorageError, open_directory_no_links, private_parent,
+                             publish_private_bytes, read_regular_bytes, require_absent)
 from resilience_plan import MAX_INPUT_BYTES, PlanError, load_plan, validate_plan
 
 FORMAT_VERSION = 1
+SUMMARY_FORMAT_VERSION = 1
+OPERATIONS = ("added", "removed", "changed")
 PAYLOAD_NAMES = ("comparison.json", "review.html")
 ARTIFACT_NAMES = frozenset((*PAYLOAD_NAMES, "manifest.json"))
 SECTIONS = ("title", "region", "reviewed_on", "contacts", "meeting_points", "household", "notes", "sources")
@@ -90,6 +93,44 @@ def compare_plans(before, after):
             "matching": "ordered-index", "review_state": "not_verified_by_tool",
             "before": metadata(before, before_bytes), "after": metadata(after, after_bytes),
             "summary": summary, "changes": changes}
+
+
+def summarize_revision(before, after):
+    """Count fixed sections and operations without returning values or fingerprints.
+
+    This intentionally does not construct a full report or identify either
+    source. Equal count patterns produce the same summary, even for different
+    plans. Aggregate counts can still be sensitive and are not anonymous.
+    """
+    before, _ = _snapshot(before)
+    after, _ = _snapshot(after)
+    totals = {operation: 0 for operation in (*OPERATIONS, "total")}
+    sections = {section: dict(totals) for section in SECTIONS}
+    for change in _changes(before, after):
+        section = change["path"].split("/", 2)[1]
+        operation = change["operation"]
+        sections[section][operation] += 1
+        sections[section]["total"] += 1
+        totals[operation] += 1
+        totals["total"] += 1
+    return {"summary_format": SUMMARY_FORMAT_VERSION, "plan_schema_version": 1,
+            "matching": "ordered-index", "review_state": "not_verified_by_tool",
+            "totals": totals, "sections": sections}
+
+
+def create_revision_summary(before_path, after_path, destination):
+    """Publish one complete private JSON summary without a value-bearing report."""
+    summary = summarize_revision(load_plan(before_path), load_plan(after_path))
+    payload = _json_bytes(summary)
+    try:
+        with private_parent(destination, "private-output", ".json", create=True) as (parent, leaf):
+            require_absent(parent, leaf)
+            publish_private_bytes(parent, leaf, payload)
+    except StorageError:
+        raise
+    except (OSError, ValueError, RuntimeError):
+        raise StorageError("Unable to save the private revision summary. No existing output was overwritten.") from None
+    return summary
 
 
 def render_review(report):
